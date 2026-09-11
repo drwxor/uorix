@@ -338,11 +338,6 @@ static const uint8_t *glyph(char c)
     }
 }
 
-
-/* ------------------------------------------------------------------------- */
-/* Framebuffer primitives                                                   */
-/* ------------------------------------------------------------------------- */
-
 static void putpixel(
     uint64_t x,
     uint64_t y,
@@ -363,11 +358,6 @@ static void putpixel(
 
     pixel[x] = color;
 }
-
-
-/* ------------------------------------------------------------------------- */
-/* Public renderer API                                                      */
-/* ------------------------------------------------------------------------- */
 
 void renderer_init(struct limine_framebuffer *fb)
 {
@@ -451,13 +441,11 @@ void render_putc(char c)
 
     cursor_x += font_width + font_spacing;
 
-    /* Basic horizontal wrapping. */
     if (cursor_x + font_width >= framebuffer->width) {
         cursor_x = 32;
         cursor_y += font_height + font_spacing;
     }
 
-    /* Basic vertical wrapping. */
     if (cursor_y + font_height >= framebuffer->height)
         cursor_y = 32;
 }
@@ -467,11 +455,6 @@ void render_puts(const char *s)
     while (*s)
         render_putc(*s++);
 }
-
-
-/* ------------------------------------------------------------------------- */
-/* Integer formatting                                                       */
-/* ------------------------------------------------------------------------- */
 
 static void render_uint(
     uint64_t value,
