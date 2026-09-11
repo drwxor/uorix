@@ -1,0 +1,31 @@
+cc = clang
+ld = ld.lld
+
+cflags = -Iinclude -target x86_64-unknown-none -ffreestanding -fno-stack-protector -fno-pic -fno-pie -mno-red-zone -mno-sse -mno-sse2 -mcmodel=kernel -Wall -Wextra -O2
+
+rule cc
+    command = $cc $cflags -c $in -o $out
+    description = CC $in
+
+rule ld
+    command = $ld -T linker.ld -o $out $in
+    description = LD $out
+
+rule asm
+    command = clang -target x86_64-unknown-none -ffreestanding -c $in -o $out
+    description = AS $in
+
+build build/entry.o: asm src/kernel/entry.S
+build build/main.o: cc src/kernel/main.c
+build build/renderer.o: cc src/kernel/renderer.c
+build build/keyboard.o: cc src/kernel/keyboard.c
+build build/shell.o: cc src/shell/shell.c
+
+build build/uorix.elf: ld $
+    build/entry.o $
+    build/main.o $
+    build/renderer.o $
+    build/keyboard.o $
+    build/shell.o $
+
+default build/uorix.elf
