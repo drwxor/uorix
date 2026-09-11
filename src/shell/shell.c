@@ -9,6 +9,7 @@
 #include "shell/commands/help.h"
 #include "shell/commands/echo.h"
 #include "shell/commands/uname.h"
+#include "shell/commands/info.h"
 
 #include <stdint.h>
 
@@ -50,6 +51,11 @@ static void shell_execute(void)
 
     if (strcmp_local(line, "uname") == 0) {
         shell_command_uname();
+        return;
+    }
+
+    if (strcmp_local(line, "info") == 0) {
+        shell_command_info();
         return;
     }
 
