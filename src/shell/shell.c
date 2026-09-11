@@ -1,8 +1,14 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 
 #include "shell/shell.h"
+
 #include "kernel/renderer.h"
 #include "kernel/keyboard.h"
+
+#include "shell/commands/clear.h"
+#include "shell/commands/help.h"
+#include "shell/commands/echo.h"
+#include "shell/commands/uname.h"
 
 #include <stdint.h>
 
@@ -27,37 +33,23 @@ static void line_clear(void)
     line[0] = '\0';
 }
 
-static void shell_help(void)
-{
-    render_printf("commands:\n");
-    render_printf("  help     show this message\n");
-    render_printf("  clear    clear the screen\n");
-    render_printf("  echo     print text\n");
-    render_printf("  uname    show system name\n");
-}
-
-static void shell_echo(const char *args)
-{
-    render_printf("%s\n", args);
-}
-
 static void shell_execute(void)
 {
     if (line_length == 0)
         return;
 
     if (strcmp_local(line, "help") == 0) {
-        shell_help();
+        shell_command_help();
         return;
     }
 
     if (strcmp_local(line, "clear") == 0) {
-        render_clear(0x00000000);
+        shell_command_clear();
         return;
     }
 
     if (strcmp_local(line, "uname") == 0) {
-        render_printf("uorix x86_64\n");
+        shell_command_uname();
         return;
     }
 
@@ -68,7 +60,7 @@ static void shell_execute(void)
         line[3] == 'o' &&
         line[4] == ' ') {
 
-        shell_echo(line + 5);
+        shell_command_echo(line + 5);
         return;
     }
 

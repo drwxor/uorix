@@ -5,11 +5,7 @@
 
 #include <stdint.h>
 
-#ifdef LIMINE_NO_POINTERS
-# define LIMINE_PTR(type) uint64_t
-#else
-# define LIMINE_PTR(type) type
-#endif
+#define LIMINE_PTR(type) type
 
 #define LIMINE_COMMON_MAGIC \
     0xc7b1dd30df4c8b88, 0x0a82e883a194f07b
