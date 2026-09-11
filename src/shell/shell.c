@@ -29,8 +29,6 @@ static void line_clear(void)
 
 static void shell_help(void)
 {
-    render_printf("uorix shell\n");
-
     render_printf("commands:\n");
     render_printf("  help     show this message\n");
     render_printf("  clear    clear the screen\n");
