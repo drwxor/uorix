@@ -51,23 +51,6 @@ The helper script is intended for local development and testing only. It contain
 ~~The current shell is built directly into the kernel.~~
 ###### well it kinda is but not quite from now on
 
-Example:
-
-```text
-$ help
-commands:
-  help     show this message
-  clear    clear the screen
-  echo     print text
-  uname    show system name
-
-$ echo hello
-hello
-
-$ uname
-uorix x86_64
-```
-
 ## Design
 
 Uorix currently favors a small and direct design.
