@@ -17,6 +17,7 @@ Current functionality includes:
 * PS/2 keyboard input
 * Interactive kernel shell
 * Basic shell commands
+* Ring-3
 * Basic serial/debug support
 
 The shell currently runs in the kernel.
@@ -47,7 +48,8 @@ The helper script is intended for local development and testing only. It contain
 
 ## Shell
 
-The current shell is built directly into the kernel.
+~~The current shell is built directly into the kernel.~~
+###### well it kinda is but not quite from now on
 
 Example:
 
@@ -70,7 +72,8 @@ uorix x86_64
 
 Uorix currently favors a small and direct design.
 
-There is no userspace/process separation yet. Everything currently executes in the kernel address space, including the shell.
+~~There is no userspace/process separation yet. Everything currently executes in the kernel address space, including the shell.~~ <br />
+Ring-3 was implemented
 
 This is intentional for the current stage of development. More advanced process isolation may be added later.
 
