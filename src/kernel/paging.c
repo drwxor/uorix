@@ -8,46 +8,58 @@
 
 static uint64_t hhdm_offset;
 
-static inline uint64_t read_cr3(void)
+static inline
+uint64_t
+read_cr3(void)
 {
     uint64_t cr3;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(cr3));
     return cr3;
 }
 
-static inline void invlpg(uint64_t virt)
+static inline
+void
+invlpg(uint64_t virt)
 {
     __asm__ volatile ("invlpg (%0)" : : "r"(virt) : "memory");
 }
 
-static inline void *phys_to_virt(uint64_t phys)
+static inline
+void
+*phys_to_virt(uint64_t phys)
 {
     return (void *)(phys + hhdm_offset);
 }
 
-static void zero_page(uint64_t phys)
+static
+void
+zero_page(uint64_t phys)
 {
     uint64_t *p = (uint64_t *)phys_to_virt(phys);
     for (int i = 0; i < 512; i++)
         p[i] = 0;
 }
 
-void paging_init(uint64_t hhdm)
+void
+paging_init(uint64_t hhdm)
 {
     hhdm_offset = hhdm;
 }
 
-uint64_t paging_hhdm(void)
+uint64_t
+paging_hhdm(void)
 {
     return hhdm_offset;
 }
 
-void *paging_phys_to_virt(uint64_t phys)
+void
+*paging_phys_to_virt(uint64_t phys)
 {
     return phys_to_virt(phys);
 }
 
-void paging_load_cr3(uint64_t pml4_phys)
+void
+paging_load_cr3(uint64_t pml4_phys)
 {
     __asm__ volatile (
         "mov %0, %%cr3"
@@ -57,13 +69,16 @@ void paging_load_cr3(uint64_t pml4_phys)
     );
 }
 
-static void mark_user(uint64_t *pte)
+static
+void
+mark_user(uint64_t *pte)
 {
     if (*pte & PTE_PRESENT)
         *pte |= PTE_USER;
 }
 
-void paging_allow_user_access(void)
+void
+paging_allow_user_access(void)
 {
     uint64_t cr3 = read_cr3();
     uint64_t *pml4 = (uint64_t *)phys_to_virt(cr3 & PTE_ADDR_MASK);
@@ -101,7 +116,8 @@ void paging_allow_user_access(void)
     paging_load_cr3(cr3 & PTE_ADDR_MASK);
 }
 
-uint64_t paging_virt_to_phys(uint64_t virt)
+uint64_t
+paging_virt_to_phys(uint64_t virt)
 {
     uint64_t cr3 = read_cr3();
     uint64_t *pml4 = (uint64_t *)phys_to_virt(cr3 & PTE_ADDR_MASK);
@@ -133,7 +149,8 @@ uint64_t paging_virt_to_phys(uint64_t virt)
     return (pt[pt_i] & PTE_ADDR_MASK) + (virt & 0xFFFULL);
 }
 
-int paging_map_page_in(uint64_t pml4_phys, uint64_t virt, uint64_t phys, uint64_t flags)
+int
+paging_map_page_in(uint64_t pml4_phys, uint64_t virt, uint64_t phys, uint64_t flags)
 {
     uint64_t *pml4 = (uint64_t *)phys_to_virt(pml4_phys & PTE_ADDR_MASK);
 
@@ -180,12 +197,14 @@ int paging_map_page_in(uint64_t pml4_phys, uint64_t virt, uint64_t phys, uint64_
     return 0;
 }
 
-int paging_map_page(uint64_t virt, uint64_t phys, uint64_t flags)
+int
+paging_map_page(uint64_t virt, uint64_t phys, uint64_t flags)
 {
     return paging_map_page_in(read_cr3() & PTE_ADDR_MASK, virt, phys, flags);
 }
 
-void paging_unmap_page(uint64_t virt)
+void
+paging_unmap_page(uint64_t virt)
 {
     uint64_t cr3 = read_cr3();
     uint64_t *pml4 = (uint64_t *)phys_to_virt(cr3 & PTE_ADDR_MASK);
@@ -209,7 +228,8 @@ void paging_unmap_page(uint64_t virt)
     invlpg(virt);
 }
 
-uint64_t paging_create_user_as(uint64_t *user_stack_top)
+uint64_t
+paging_create_user_as(uint64_t *user_stack_top)
 {
     uint64_t kernel_cr3 = read_cr3() & PTE_ADDR_MASK;
     uint64_t *kernel_pml4 = (uint64_t *)phys_to_virt(kernel_cr3);

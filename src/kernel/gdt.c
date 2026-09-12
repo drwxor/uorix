@@ -7,7 +7,8 @@ static struct gdt_tss_entry *tss_entry = (struct gdt_tss_entry *)&gdt[5];
 static struct gdt_ptr gdtr;
 static struct tss tss;
 
-static void gdt_set_entry(int idx, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
+static void
+gdt_set_entry(int idx, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
 {
     gdt[idx].base_low = base & 0xFFFF;
     gdt[idx].base_mid = (base >> 16) & 0xFF;
@@ -18,7 +19,8 @@ static void gdt_set_entry(int idx, uint32_t base, uint32_t limit, uint8_t access
     gdt[idx].access = access;
 }
 
-static void gdt_set_tss(uint64_t base, uint32_t limit)
+static void
+gdt_set_tss(uint64_t base, uint32_t limit)
 {
     tss_entry->limit_low = limit & 0xFFFF;
     tss_entry->base_low = base & 0xFFFF;
@@ -30,27 +32,26 @@ static void gdt_set_tss(uint64_t base, uint32_t limit)
     tss_entry->reserved = 0;
 }
 
-void tss_set_rsp0(uint64_t rsp0)
+void
+tss_set_rsp0(uint64_t rsp0)
 {
     tss.rsp0 = rsp0;
 }
 
-void gdt_init(void)
+void
+gdt_init(void)
 {
     gdt_set_entry(0, 0, 0, 0, 0);
 
     gdt_set_entry(1, 0, 0xFFFFF, 0x9A, 0xA0);
-
     gdt_set_entry(2, 0, 0xFFFFF, 0x92, 0xC0);
-
     gdt_set_entry(3, 0, 0xFFFFF, 0xFA, 0xA0);
-
     gdt_set_entry(4, 0, 0xFFFFF, 0xF2, 0xC0);
 
     gdt_set_tss((uint64_t)&tss, sizeof(tss) - 1);
 
     gdtr.limit = sizeof(gdt) - 1;
-    gdtr.base  = (uint64_t)&gdt;
+    gdtr.base = (uint64_t)&gdt;
 
     __asm__ volatile (
         "lgdt %0"

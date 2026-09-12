@@ -7,8 +7,9 @@
 
 #include <stdint.h>
 
-struct block {
-    size_t        size;
+struct block
+{
+    size_t size;
     struct block *next;
 };
 
@@ -19,25 +20,29 @@ struct block {
 static struct block *free_list;
 static int heap_ready;
 
-static size_t align_up(size_t n)
+static
+size_t
+align_up(size_t n)
 {
     return (n + (ALIGN - 1)) & ~(size_t)(ALIGN - 1);
 }
 
-static void freelist_add(struct block *b)
+static
+void
+freelist_add(struct block *b)
 {
     struct block *prev = 0;
     struct block *cur  = free_list;
 
     while (cur && cur < b) {
         prev = cur;
-        cur  = cur->next;
+        cur = cur->next;
     }
 
     if (cur &&
         (uint8_t *)b + HEADER_SIZE + b->size == (uint8_t *)cur) {
         b->size += HEADER_SIZE + cur->size;
-        b->next  = cur->next;
+        b->next = cur->next;
     } else {
         b->next = cur;
     }
@@ -45,7 +50,7 @@ static void freelist_add(struct block *b)
     if (prev &&
         (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b) {
         prev->size += HEADER_SIZE + b->size;
-        prev->next  = b->next;
+        prev->next = b->next;
     } else if (prev) {
         prev->next = b;
     } else {
@@ -53,7 +58,8 @@ static void freelist_add(struct block *b)
     }
 }
 
-static int heap_expand(size_t need)
+static int
+heap_expand(size_t need)
 {
     size_t total = align_up(need + HEADER_SIZE);
     if (total < PAGE_SIZE)
@@ -73,7 +79,8 @@ static int heap_expand(size_t need)
     return 0;
 }
 
-void heap_init(void)
+void
+heap_init(void)
 {
     free_list  = 0;
     heap_ready = 1;
@@ -84,7 +91,8 @@ void heap_init(void)
         render_printf("heap ready\n");
 }
 
-void *kmalloc(size_t size)
+void
+*kmalloc(size_t size)
 {
     if (!heap_ready || size == 0)
         return 0;
@@ -95,13 +103,12 @@ void *kmalloc(size_t size)
 
     for (;;) {
         struct block *prev = 0;
-        struct block *cur  = free_list;
+        struct block *cur = free_list;
 
         while (cur) {
             if (cur->size >= size) {
                 if (cur->size >= size + HEADER_SIZE + MIN_PAYLOAD) {
-                    struct block *split =
-                        (struct block *)((uint8_t *)cur + HEADER_SIZE + size);
+                    struct block *split = (struct block *)((uint8_t *)cur + HEADER_SIZE + size);
                     split->size = cur->size - size - HEADER_SIZE;
                     split->next = cur->next;
                     cur->size = size;
@@ -128,7 +135,8 @@ void *kmalloc(size_t size)
     }
 }
 
-void kfree(void *ptr)
+void
+kfree(void *ptr)
 {
     if (!ptr || !heap_ready)
         return;

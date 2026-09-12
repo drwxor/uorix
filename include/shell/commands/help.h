@@ -5,7 +5,9 @@
 
 #include "user/user.h"
 
-static void shell_command_help(void)
+static
+void
+shell_command_help(void)
 {
     user_puts("commands:\n");
     user_puts("  help     show this message\n");

@@ -5,7 +5,9 @@
 
 #include "kernel/syscall.h"
 
-static void shell_command_clear(void)
+static
+void
+shell_command_clear(void)
 {
     syscall0(SYS_CLEAR);
 }

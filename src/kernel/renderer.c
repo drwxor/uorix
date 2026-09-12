@@ -294,7 +294,9 @@ static const uint8_t glyph_underscore[8] = {
     0x00
 };
 
-static const uint8_t *glyph(char c)
+static const
+uint8_t
+*glyph(char c)
 {
     if (c >= 'a' && c <= 'z')
         return font[c - 'a'];
@@ -338,7 +340,9 @@ static const uint8_t *glyph(char c)
     }
 }
 
-static void putpixel(uint64_t x, uint64_t y, uint32_t color)
+static
+void
+putpixel(uint64_t x, uint64_t y, uint32_t color)
 {
     if (framebuffer == 0)
         return;
@@ -355,7 +359,8 @@ static void putpixel(uint64_t x, uint64_t y, uint32_t color)
     pixel[x] = color;
 }
 
-void renderer_init(struct limine_framebuffer *fb)
+void
+renderer_init(struct limine_framebuffer *fb)
 {
     framebuffer = fb;
 
@@ -363,7 +368,8 @@ void renderer_init(struct limine_framebuffer *fb)
     cursor_y = 32;
 }
 
-void render_clear(uint32_t color)
+void
+render_clear(uint32_t color)
 {
     if (framebuffer == 0)
         return;
@@ -383,7 +389,9 @@ void render_clear(uint32_t color)
     cursor_y = 32;
 }
 
-static void draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
+static
+void
+draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
 {
     for (uint64_t row = 0; row < font_height; row++) {
         for (uint64_t col = 0; col < font_width; col++) {
@@ -393,7 +401,8 @@ static void draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
     }
 }
 
-void render_putc(char c)
+void
+render_putc(char c)
 {
     if (framebuffer == 0)
         return;
@@ -442,13 +451,16 @@ void render_putc(char c)
         cursor_y = 32;
 }
 
-void render_puts(const char *s)
+void
+render_puts(const char *s)
 {
     while (*s)
         render_putc(*s++);
 }
 
-static void render_uint(uint64_t value, uint32_t base)
+static
+void
+render_uint(uint64_t value, uint32_t base)
 {
     char buffer[32];
     uint32_t length = 0;
@@ -473,7 +485,9 @@ static void render_uint(uint64_t value, uint32_t base)
         render_putc(buffer[--length]);
 }
 
-static void render_int(int64_t value)
+static
+void
+render_int(int64_t value)
 {
     if (value < 0) {
         render_putc('-');
@@ -483,7 +497,8 @@ static void render_int(int64_t value)
     }
 }
 
-void render_printf(const char *fmt, ...)
+void
+render_printf(const char *fmt, ...)
 {
     va_list args;
 

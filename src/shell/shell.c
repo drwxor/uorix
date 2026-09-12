@@ -18,7 +18,9 @@
 static char line[LINE_SIZE];
 static uint64_t line_length;
 
-static int strcmp_local(const char *a, const char *b)
+static
+int
+strcmp_local(const char *a, const char *b)
 {
     while (*a && *a == *b) {
         a++;
@@ -27,13 +29,17 @@ static int strcmp_local(const char *a, const char *b)
     return (unsigned char)*a - (unsigned char)*b;
 }
 
-static void line_clear(void)
+static
+void
+line_clear(void)
 {
     line_length = 0;
     line[0] = '\0';
 }
 
-static void shell_execute(void)
+static
+void
+shell_execute(void)
 {
     if (line_length == 0)
         return;
@@ -84,12 +90,14 @@ static void shell_execute(void)
     user_putc('\n');
 }
 
-void shell_init(void)
+void
+shell_init(void)
 {
     line_clear();
 }
 
-void shell_run(void)
+void
+shell_run(void)
 {
     user_puts("$ ");
 

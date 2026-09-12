@@ -5,7 +5,9 @@
 
 #include "user/user.h"
 
-static void shell_command_uname(void)
+static
+void
+shell_command_uname(void)
 {
     user_puts("uorix x86_64\n");
 }
