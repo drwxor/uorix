@@ -10,27 +10,37 @@ static uint64_t bitmap_pages;
 static uint64_t free_count;
 static uint64_t hhdm_offset;
 
-static inline void *phys_to_virt(uint64_t phys)
+static inline
+void
+*phys_to_virt   (uint64_t phys)
 {
     return (void *)(phys + hhdm_offset);
 }
 
-static inline void bitmap_set(uint64_t page)
+static inline
+void
+bitmap_set(uint64_t page)
 {
     bitmap[page / 8] |= (uint8_t)(1u << (page % 8));
 }
 
-static inline void bitmap_clear(uint64_t page)
+static inline
+void
+bitmap_clear(uint64_t page)
 {
     bitmap[page / 8] &= (uint8_t)~(1u << (page % 8));
 }
 
-static inline int bitmap_test(uint64_t page)
+static inline
+int
+bitmap_test(uint64_t page)
 {
     return (bitmap[page / 8] >> (page % 8)) & 1;
 }
 
-static void mark_region_used(uint64_t base, uint64_t length)
+static
+void
+mark_region_used(uint64_t base, uint64_t length)
 {
     uint64_t start = base / PAGE_SIZE;
     uint64_t end   = (base + length + PAGE_SIZE - 1) / PAGE_SIZE;
@@ -47,7 +57,8 @@ static void mark_region_used(uint64_t base, uint64_t length)
     }
 }
 
-void pmm_init(struct limine_memmap_response *memmap, uint64_t hhdm)
+void
+pmm_init(struct limine_memmap_response *memmap, uint64_t hhdm)
 {
     hhdm_offset = hhdm;
     bitmap = 0;
@@ -131,7 +142,8 @@ void pmm_init(struct limine_memmap_response *memmap, uint64_t hhdm)
     render_printf("pmm: %u pages free / %u total\n", (uint32_t)free_count, (uint32_t)bitmap_pages);
 }
 
-uint64_t pmm_alloc_page(void)
+uint64_t
+pmm_alloc_page(void)
 {
     if (bitmap == 0 || free_count == 0)
         return 0;
@@ -146,7 +158,8 @@ uint64_t pmm_alloc_page(void)
     return 0;
 }
 
-void pmm_free_page(uint64_t phys)
+void
+pmm_free_page(uint64_t phys)
 {
     if (bitmap == 0 || phys == 0)
         return;
@@ -161,17 +174,20 @@ void pmm_free_page(uint64_t phys)
     }
 }
 
-uint64_t pmm_total_pages(void)
+uint64_t
+pmm_total_pages(void)
 {
     return bitmap_pages;
 }
 
-uint64_t pmm_free_pages(void)
+uint64_t
+pmm_free_pages(void)
 {
     return free_count;
 }
 
-uint64_t pmm_used_pages(void)
+uint64_t
+pmm_used_pages(void)
 {
     if (bitmap_pages < free_count)
         return 0;

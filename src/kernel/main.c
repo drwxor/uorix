@@ -13,12 +13,10 @@
 #include "shell/shell.h"
 
 __attribute__((used, section(".limine_requests")))
-static volatile uint64_t limine_requests_start_marker[] =
-    LIMINE_REQUESTS_START_MARKER;
+static volatile uint64_t limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
 
 __attribute__((used, section(".limine_requests")))
-static volatile uint64_t limine_base_revision[] =
-    LIMINE_BASE_REVISION(6);
+static volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
 
 __attribute__((used, section(".limine_requests")))
 static volatile struct limine_framebuffer_request framebuffer_request = {
@@ -39,15 +37,16 @@ static volatile struct limine_memmap_request memmap_request = {
 };
 
 __attribute__((used, section(".limine_requests")))
-static volatile uint64_t limine_requests_end_marker[] =
-    LIMINE_REQUESTS_END_MARKER;
+static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
 static uint8_t kernel_stack[16384] __attribute__((aligned(16)));
 #define KERNEL_STACK_TOP ((uint64_t)&kernel_stack[sizeof(kernel_stack)])
 
 extern void user_enter(uint64_t entry, uint64_t user_stack);
 
-void kmain(void)
+void
+kmain
+(void)
 {
     struct limine_framebuffer_response *fb_resp = framebuffer_request.response;
 

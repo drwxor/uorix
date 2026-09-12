@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 
-uint64_t syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5)
+uint64_t
+syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5)
 {
     (void)a3;
     (void)a4;
@@ -47,7 +48,8 @@ uint64_t syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uin
     }
 }
 
-long syscall0(long n)
+long
+syscall0(long n)
 {
     long ret;
     __asm__ volatile (
@@ -59,7 +61,8 @@ long syscall0(long n)
     return ret;
 }
 
-long syscall1(long n, long a1)
+long
+syscall1(long n, long a1)
 {
     long ret;
     __asm__ volatile (
@@ -71,7 +74,8 @@ long syscall1(long n, long a1)
     return ret;
 }
 
-long syscall2(long n, long a1, long a2)
+long
+syscall2(long n, long a1, long a2)
 {
     long ret;
     __asm__ volatile (
@@ -83,7 +87,8 @@ long syscall2(long n, long a1, long a2)
     return ret;
 }
 
-long syscall3(long n, long a1, long a2, long a3)
+long
+syscall3(long n, long a1, long a2, long a3)
 {
     long ret;
     __asm__ volatile (

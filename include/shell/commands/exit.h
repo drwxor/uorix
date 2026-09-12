@@ -6,7 +6,9 @@
 #include "user/user.h"
 #include "kernel/syscall.h"
 
-static void shell_command_exit(void)
+static
+void
+shell_command_exit(void)
 {
     user_puts("exiting\n");
     syscall0(SYS_EXIT);

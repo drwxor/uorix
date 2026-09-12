@@ -6,13 +6,13 @@
 #include "user/user.h"
 #include "kernel/syscall.h"
 
-/* SYS_MEMINFO returns free pages in rax; we print a simple line. */
 #define SYS_MEMINFO 3
 
-static void shell_command_mem(void)
+static
+void
+shell_command_mem(void)
 {
     long free_pages = syscall0(SYS_MEMINFO);
-    /* tiny decimal print without a full printf in userspace */
     char buf[32];
     int i = 0;
     unsigned long n = (unsigned long)free_pages;

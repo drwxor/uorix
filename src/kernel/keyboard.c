@@ -4,7 +4,9 @@
 
 #include <stdint.h>
 
-static inline uint8_t inb(uint16_t port)
+static inline
+uint8_t
+inb(uint16_t port)
 {
     uint8_t value;
 
@@ -17,12 +19,16 @@ static inline uint8_t inb(uint16_t port)
     return value;
 }
 
-static int keyboard_ready(void)
+static
+int
+keyboard_ready(void)
 {
     return inb(0x64) & 1;
 }
 
-static uint8_t keyboard_read_scancode(void)
+static
+uint8_t
+keyboard_read_scancode(void)
 {
     while (!keyboard_ready())
         ;
@@ -94,7 +100,8 @@ static const char scancode_ascii[128] = {
     [0x39] = ' '
 };
 
-char keyboard_getc(void)
+char
+keyboard_getc(void)
 {
     for (;;) {
         uint8_t scancode = keyboard_read_scancode();

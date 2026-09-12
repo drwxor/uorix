@@ -6,7 +6,8 @@
 static struct idt_entry idt[256];
 static struct idt_ptr idtr;
 
-void idt_set_gate(uint8_t vector, uint64_t handler, uint8_t flags)
+void
+idt_set_gate(uint8_t vector, uint64_t handler, uint8_t flags)
 {
     idt[vector].offset_low = handler & 0xFFFF;
     idt[vector].selector = KERNEL_CS;
@@ -19,7 +20,8 @@ void idt_set_gate(uint8_t vector, uint64_t handler, uint8_t flags)
 
 extern void isr_null(void);
 
-void idt_init(void)
+void
+idt_init(void)
 {
     for (int i = 0; i < 256; i++)
         idt_set_gate(i, (uint64_t)isr_null, 0x8E);

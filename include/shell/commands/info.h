@@ -13,7 +13,9 @@ static const char *logo[] = {
     0
 };
 
-static void shell_command_info(void)
+static
+void
+shell_command_info(void)
 {
     user_puts("\n");
 
