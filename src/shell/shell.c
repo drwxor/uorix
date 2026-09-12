@@ -2,14 +2,13 @@
 
 #include "shell/shell.h"
 
-#include "kernel/renderer.h"
-#include "kernel/keyboard.h"
+#include "user/user.h"
 
 #include "shell/commands/clear.h"
 #include "shell/commands/help.h"
-#include "shell/commands/echo.h"
-#include "shell/commands/uname.h"
 #include "shell/commands/info.h"
+#include "shell/commands/uname.h"
+#include "shell/commands/exit.h"
 
 #include <stdint.h>
 
@@ -24,7 +23,6 @@ static int strcmp_local(const char *a, const char *b)
         a++;
         b++;
     }
-
     return (unsigned char)*a - (unsigned char)*b;
 }
 
@@ -54,6 +52,11 @@ static void shell_execute(void)
         return;
     }
 
+    if (strcmp_local(line, "exit") == 0) {
+        shell_command_exit();
+        return;
+    }
+
     if (strcmp_local(line, "info") == 0) {
         shell_command_info();
         return;
@@ -65,15 +68,14 @@ static void shell_execute(void)
         line[2] == 'h' &&
         line[3] == 'o' &&
         line[4] == ' ') {
-
-        shell_command_echo(line + 5);
+        user_puts(line + 5);
+        user_putc('\n');
         return;
     }
 
-    render_printf(
-        "uorix: command not found: %s\n",
-        line
-    );
+    user_puts("uorix: command not found: ");
+    user_puts(line);
+    user_putc('\n');
 }
 
 void shell_init(void)
@@ -83,18 +85,16 @@ void shell_init(void)
 
 void shell_run(void)
 {
-    render_printf("$ ");
+    user_puts("$ ");
 
     for (;;) {
-        char c = keyboard_getc();
+        char c = user_getc();
 
         if (c == '\n') {
-            render_putc('\n');
-
+            user_putc('\n');
             shell_execute();
             line_clear();
-
-            render_printf("$ ");
+            user_puts("$ ");
             continue;
         }
 
@@ -102,10 +102,8 @@ void shell_run(void)
             if (line_length > 0) {
                 line_length--;
                 line[line_length] = '\0';
-
-                render_putc('\b');
+                user_putc('\b');
             }
-
             continue;
         }
 
@@ -117,7 +115,6 @@ void shell_run(void)
 
         line[line_length++] = c;
         line[line_length] = '\0';
-
-        render_putc(c);
+        user_putc(c);
     }
 }

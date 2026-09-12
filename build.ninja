@@ -16,16 +16,30 @@ rule asm
     description = AS $in
 
 build build/entry.o: asm src/kernel/entry.S
+build build/isr.o: asm src/kernel/isr.S
+build build/user_entry.o: asm src/kernel/user_entry.S
 build build/main.o: cc src/kernel/main.c
 build build/renderer.o: cc src/kernel/renderer.c
 build build/keyboard.o: cc src/kernel/keyboard.c
+build build/gdt.o: cc src/kernel/gdt.c
+build build/idt.o: cc src/kernel/idt.c
+build build/syscall.o: cc src/kernel/syscall.c
+build build/paging.o: cc src/kernel/paging.c
+build build/user.o: cc src/user/user.c
 build build/shell.o: cc src/shell/shell.c
 
 build build/uorix.elf: ld $
     build/entry.o $
+    build/isr.o $
+    build/user_entry.o $
     build/main.o $
     build/renderer.o $
     build/keyboard.o $
+    build/gdt.o $
+    build/idt.o $
+    build/syscall.o $
+    build/paging.o $
+    build/user.o $
     build/shell.o $
 
 default build/uorix.elf

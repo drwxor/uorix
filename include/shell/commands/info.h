@@ -3,7 +3,7 @@
 #ifndef UORIX_SHELL_INFO_H
 #define UORIX_SHELL_INFO_H
 
-#include "kernel/renderer.h"
+#include "user/user.h"
 
 static const char *logo[] = {
     "u u  oo  rr  i x x",
@@ -15,27 +15,27 @@ static const char *logo[] = {
 
 static void shell_command_info(void)
 {
-    render_printf("\n");
+    user_puts("\n");
 
     for (int i = 0; logo[i] != 0; i++) {
-        render_printf("%s", logo[i]);
+        user_puts(logo[i]);
 
         if (i == 0)
-            render_printf("    uorix x86_64");
+            user_puts("    uorix x86_64");
 
         if (i == 1)
-            render_printf("    kernel: uorix");
+            user_puts("    kernel: uorix");
 
         if (i == 2)
-            render_printf("    shell: uorix");
+            user_puts("    shell: uorix");
 
         if (i == 3)
-            render_printf("    bootloader: limine");
+            user_puts("    bootloader: limine");
 
-        render_printf("\n");
+        user_puts("\n");
     }
 
-    render_printf("\n");
+    user_puts("\n");
 }
 
 #endif

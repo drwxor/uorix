@@ -3,11 +3,11 @@
 #ifndef UORIX_SHELL_CLEAR_H
 #define UORIX_SHELL_CLEAR_H
 
-#include "kernel/renderer.h"
+#include "kernel/syscall.h"
 
 static void shell_command_clear(void)
 {
-    render_clear(0x00000000);
+    syscall0(SYS_CLEAR);
 }
 
 #endif
