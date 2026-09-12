@@ -3,11 +3,11 @@
 #ifndef UORIX_SHELL_UNAME_H
 #define UORIX_SHELL_UNAME_H
 
-#include "kernel/renderer.h"
+#include "user/user.h"
 
 static void shell_command_uname(void)
 {
-    render_printf("uorix x86_64\n");
+    user_puts("uorix x86_64\n");
 }
 
 #endif
