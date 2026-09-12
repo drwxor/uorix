@@ -104,8 +104,8 @@ void *kmalloc(size_t size)
                         (struct block *)((uint8_t *)cur + HEADER_SIZE + size);
                     split->size = cur->size - size - HEADER_SIZE;
                     split->next = cur->next;
-                    cur->size   = size;
-                    cur->next   = 0;
+                    cur->size = size;
+                    cur->next = 0;
                     if (prev)
                         prev->next = split;
                     else
@@ -120,7 +120,7 @@ void *kmalloc(size_t size)
                 return (void *)((uint8_t *)cur + HEADER_SIZE);
             }
             prev = cur;
-            cur  = cur->next;
+            cur = cur->next;
         }
 
         if (heap_expand(size) != 0)

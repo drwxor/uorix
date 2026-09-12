@@ -49,8 +49,7 @@ extern void user_enter(uint64_t entry, uint64_t user_stack);
 
 void kmain(void)
 {
-    struct limine_framebuffer_response *fb_resp =
-        framebuffer_request.response;
+    struct limine_framebuffer_response *fb_resp = framebuffer_request.response;
 
     if (fb_resp == 0 || fb_resp->framebuffer_count == 0) {
         for (;;)

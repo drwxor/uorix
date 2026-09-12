@@ -9,25 +9,25 @@ static struct tss tss;
 
 static void gdt_set_entry(int idx, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
 {
-    gdt[idx].base_low    = base & 0xFFFF;
-    gdt[idx].base_mid    = (base >> 16) & 0xFF;
-    gdt[idx].base_high   = (base >> 24) & 0xFF;
-    gdt[idx].limit_low   = limit & 0xFFFF;
+    gdt[idx].base_low = base & 0xFFFF;
+    gdt[idx].base_mid = (base >> 16) & 0xFF;
+    gdt[idx].base_high = (base >> 24) & 0xFF;
+    gdt[idx].limit_low = limit & 0xFFFF;
     gdt[idx].granularity = (limit >> 16) & 0x0F;
     gdt[idx].granularity |= gran & 0xF0;
-    gdt[idx].access      = access;
+    gdt[idx].access = access;
 }
 
 static void gdt_set_tss(uint64_t base, uint32_t limit)
 {
-    tss_entry->limit_low   = limit & 0xFFFF;
-    tss_entry->base_low    = base & 0xFFFF;
-    tss_entry->base_mid    = (base >> 16) & 0xFF;
-    tss_entry->access      = 0x89;
+    tss_entry->limit_low = limit & 0xFFFF;
+    tss_entry->base_low = base & 0xFFFF;
+    tss_entry->base_mid = (base >> 16) & 0xFF;
+    tss_entry->access = 0x89;
     tss_entry->granularity = (limit >> 16) & 0x0F;
-    tss_entry->base_high   = (base >> 24) & 0xFF;
-    tss_entry->base_upper  = (base >> 32) & 0xFFFFFFFF;
-    tss_entry->reserved    = 0;
+    tss_entry->base_high = (base >> 24) & 0xFF;
+    tss_entry->base_upper = (base >> 32) & 0xFFFFFFFF;
+    tss_entry->reserved = 0;
 }
 
 void tss_set_rsp0(uint64_t rsp0)
