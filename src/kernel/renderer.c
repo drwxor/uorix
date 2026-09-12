@@ -338,11 +338,7 @@ static const uint8_t *glyph(char c)
     }
 }
 
-static void putpixel(
-    uint64_t x,
-    uint64_t y,
-    uint32_t color
-)
+static void putpixel(uint64_t x, uint64_t y, uint32_t color)
 {
     if (framebuffer == 0)
         return;
@@ -387,11 +383,7 @@ void render_clear(uint32_t color)
     cursor_y = 32;
 }
 
-static void draw_glyph(
-    const uint8_t *g,
-    uint64_t x,
-    uint64_t y
-)
+static void draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
 {
     for (uint64_t row = 0; row < font_height; row++) {
         for (uint64_t col = 0; col < font_width; col++) {
@@ -456,10 +448,7 @@ void render_puts(const char *s)
         render_putc(*s++);
 }
 
-static void render_uint(
-    uint64_t value,
-    uint32_t base
-)
+static void render_uint(uint64_t value, uint32_t base)
 {
     char buffer[32];
     uint32_t length = 0;
@@ -494,10 +483,7 @@ static void render_int(int64_t value)
     }
 }
 
-void render_printf(
-    const char *fmt,
-    ...
-)
+void render_printf(const char *fmt, ...)
 {
     va_list args;
 
@@ -526,23 +512,15 @@ void render_printf(
             break;
 
         case 'u':
-            render_uint(
-                va_arg(args, uint64_t),
-                10
-            );
+            render_uint(va_arg(args, uint64_t), 10);
             break;
 
         case 'x':
-            render_uint(
-                va_arg(args, uint64_t),
-                16
-            );
+            render_uint(va_arg(args, uint64_t), 16);
             break;
 
         case 'd':
-            render_int(
-                va_arg(args, int64_t)
-            );
+            render_int(va_arg(args, int64_t));
             break;
 
         default:
