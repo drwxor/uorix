@@ -7,6 +7,8 @@
 #include "kernel/gdt.h"
 #include "kernel/idt.h"
 #include "kernel/paging.h"
+#include "kernel/pmm.h"
+#include "kernel/heap.h"
 #include "kernel/syscall.h"
 #include "shell/shell.h"
 
@@ -31,11 +33,14 @@ static volatile struct limine_hhdm_request hhdm_request = {
 };
 
 __attribute__((used, section(".limine_requests")))
+static volatile struct limine_memmap_request memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST_ID,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_requests_end_marker[] =
     LIMINE_REQUESTS_END_MARKER;
-
-static uint8_t user_stack[16384] __attribute__((aligned(16)));
-#define USER_STACK_TOP  ((uint64_t)&user_stack[sizeof(user_stack)])
 
 static uint8_t kernel_stack[16384] __attribute__((aligned(16)));
 #define KERNEL_STACK_TOP ((uint64_t)&kernel_stack[sizeof(kernel_stack)])
@@ -60,20 +65,41 @@ void kmain(void)
     render_printf("kernel ready\n");
     render_printf("framebuffer %ux%u ready\n", fb->width, fb->height);
 
-    gdt_init(); render_printf("gdt ready\n");
-    tss_set_rsp0(KERNEL_STACK_TOP); render_printf("tss ready\n");
-    idt_init(); render_printf("idt ready\n");
+    gdt_init();
+    render_printf("gdt ready\n");
+    tss_set_rsp0(KERNEL_STACK_TOP);
+    render_printf("tss ready\n");
+    idt_init();
+    render_printf("idt ready\n");
 
-    if (hhdm_request.response != 0) {
-        paging_allow_user_access(hhdm_request.response->offset);
+    uint64_t hhdm = 0;
+    if (hhdm_request.response != 0)
+        hhdm = hhdm_request.response->offset;
+
+    paging_init(hhdm);
+
+    if (memmap_request.response != 0)
+        pmm_init(memmap_request.response, hhdm);
+    else
+        render_printf("pmm: no memmap from limine\n");
+
+    heap_init();
+
+    paging_allow_user_access();
+
+    uint64_t user_stack_top = 0;
+    uint64_t user_pml4 = paging_create_user_as(&user_stack_top);
+    if (user_pml4 == 0) {
+        render_printf("user failed, using kernel stack\n");
+        static uint8_t fallback_stack[16384] __attribute__((aligned(16)));
+        user_stack_top = (uint64_t)&fallback_stack[sizeof(fallback_stack)];
     } else {
-        render_printf("warning: no HHDM, trying offset 0\n");
-        paging_allow_user_access(0);
+        paging_load_cr3(user_pml4);
+        render_printf("switched to user pml4\n");
     }
 
     shell_init();
-
-    user_enter((uint64_t)shell_run, USER_STACK_TOP);
+    user_enter((uint64_t)shell_run, user_stack_top);
 
     for (;;)
         __asm__ volatile ("hlt");

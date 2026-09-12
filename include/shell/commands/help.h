@@ -14,6 +14,7 @@ static void shell_command_help(void)
     user_puts("  uname    show system name\n");
     user_puts("  exit     leave the shell\n");
     user_puts("  info     print info about the system\n");
+    user_puts("  mem      show free physical pages\n");
 }
 
 #endif
