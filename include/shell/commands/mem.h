@@ -1,0 +1,39 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+
+#ifndef UORIX_SHELL_MEM_H
+#define UORIX_SHELL_MEM_H
+
+#include "user/user.h"
+#include "kernel/syscall.h"
+
+/* SYS_MEMINFO returns free pages in rax; we print a simple line. */
+#define SYS_MEMINFO 3
+
+static void shell_command_mem(void)
+{
+    long free_pages = syscall0(SYS_MEMINFO);
+    /* tiny decimal print without a full printf in userspace */
+    char buf[32];
+    int i = 0;
+    unsigned long n = (unsigned long)free_pages;
+
+    if (n == 0) {
+        buf[i++] = '0';
+    } else {
+        char tmp[20];
+        int t = 0;
+        while (n > 0) {
+            tmp[t++] = '0' + (n % 10);
+            n /= 10;
+        }
+        while (t > 0)
+            buf[i++] = tmp[--t];
+    }
+    buf[i] = '\0';
+
+    user_puts("free pages: ");
+    user_puts(buf);
+    user_putc('\n');
+}
+
+#endif

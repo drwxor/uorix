@@ -8,13 +8,13 @@ static struct idt_ptr idtr;
 
 void idt_set_gate(uint8_t vector, uint64_t handler, uint8_t flags)
 {
-    idt[vector].offset_low  = handler & 0xFFFF;
-    idt[vector].selector    = KERNEL_CS;
-    idt[vector].ist         = 0;
-    idt[vector].type_attr   = flags;
-    idt[vector].offset_mid  = (handler >> 16) & 0xFFFF;
+    idt[vector].offset_low = handler & 0xFFFF;
+    idt[vector].selector = KERNEL_CS;
+    idt[vector].ist = 0;
+    idt[vector].type_attr = flags;
+    idt[vector].offset_mid = (handler >> 16) & 0xFFFF;
     idt[vector].offset_high = (handler >> 32) & 0xFFFFFFFF;
-    idt[vector].zero       = 0;
+    idt[vector].zero = 0;
 }
 
 extern void isr_null(void);
@@ -26,7 +26,7 @@ void idt_init(void)
     idt_set_gate(0x80, (uint64_t)isr_syscall, 0xEE);
 
     idtr.limit = sizeof(idt) - 1;
-    idtr.base  = (uint64_t)&idt;
+    idtr.base = (uint64_t)&idt;
 
     __asm__ volatile (
         "lidt %0"

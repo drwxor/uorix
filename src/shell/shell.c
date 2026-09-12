@@ -9,6 +9,7 @@
 #include "shell/commands/info.h"
 #include "shell/commands/uname.h"
 #include "shell/commands/exit.h"
+#include "shell/commands/mem.h"
 
 #include <stdint.h>
 
@@ -59,6 +60,11 @@ static void shell_execute(void)
 
     if (strcmp_local(line, "info") == 0) {
         shell_command_info();
+        return;
+    }
+
+    if (strcmp_local(line, "mem") == 0) {
+        shell_command_mem();
         return;
     }
 

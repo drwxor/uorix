@@ -25,6 +25,8 @@ build build/gdt.o: cc src/kernel/gdt.c
 build build/idt.o: cc src/kernel/idt.c
 build build/syscall.o: cc src/kernel/syscall.c
 build build/paging.o: cc src/kernel/paging.c
+build build/pmm.o: cc src/kernel/pmm.c
+build build/heap.o: cc src/kernel/heap.c
 build build/user.o: cc src/user/user.c
 build build/shell.o: cc src/shell/shell.c
 
@@ -39,6 +41,8 @@ build build/uorix.elf: ld $
     build/idt.o $
     build/syscall.o $
     build/paging.o $
+    build/pmm.o $
+    build/heap.o $
     build/user.o $
     build/shell.o $
 

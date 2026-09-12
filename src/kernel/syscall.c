@@ -3,6 +3,7 @@
 #include "kernel/syscall.h"
 #include "kernel/renderer.h"
 #include "kernel/keyboard.h"
+#include "kernel/pmm.h"
 
 #include <stdint.h>
 
@@ -33,13 +34,16 @@ uint64_t syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uin
         render_clear(0x00000000);
         return 0;
 
+    case SYS_MEMINFO:
+        return pmm_free_pages();
+
     case SYS_EXIT:
         for (;;)
             __asm__ volatile ("hlt");
         return 0;
 
     default:
-        return (uint64_t)-1; /* ENOSYS */
+        return (uint64_t)-1;
     }
 }
 
