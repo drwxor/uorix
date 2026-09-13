@@ -294,6 +294,28 @@ static const uint8_t glyph_underscore[8] = {
     0x00
 };
 
+static const uint8_t glyph_lparen[8] = {
+    0x0C,
+    0x18,
+    0x30,
+    0x30,
+    0x30,
+    0x18,
+    0x0C,
+    0x00
+};
+
+static const uint8_t glyph_rparen[8] = {
+    0x30,
+    0x18,
+    0x0C,
+    0x0C,
+    0x0C,
+    0x18,
+    0x30,
+    0x00
+};
+
 static const
 uint8_t
 *glyph(char c)
@@ -335,6 +357,12 @@ uint8_t
 
     case '%':
         return glyph_percent;
+
+    case '(':
+        return glyph_lparen;
+
+    case ')':
+        return glyph_rparen;
 
     default:
         return glyph_space;

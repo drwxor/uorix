@@ -3,7 +3,7 @@
 #ifndef UORIX_SHELL_INFO_H
 #define UORIX_SHELL_INFO_H
 
-#include "user/user.h"
+#include "kernel/user/user.h"
 
 static const char *logo[] = {
     "u u  oo  rr  i x x",

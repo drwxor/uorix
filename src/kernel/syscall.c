@@ -4,6 +4,7 @@
 #include "kernel/renderer.h"
 #include "kernel/keyboard.h"
 #include "kernel/pmm.h"
+#include "kernel/elf.h"
 
 #include <stdint.h>
 
@@ -41,7 +42,11 @@ syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4,
     case SYS_MEMINFO:
         return pmm_free_pages();
 
+    case SYS_BRK:
+        return elf_brk(a1);
+
     case SYS_EXIT:
+        render_printf("\n[pid 1] exit %u\n", a1);
         for (;;)
             __asm__ volatile ("hlt");
         return 0;

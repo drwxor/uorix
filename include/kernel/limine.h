@@ -161,4 +161,33 @@ struct limine_memmap_request {
     LIMINE_PTR(struct limine_memmap_response *) response;
 };
 
+/* Modules ------------------------------------------------------------- */
+
+#define LIMINE_MODULE_REQUEST_ID \
+    { \
+        LIMINE_COMMON_MAGIC, \
+        0x3e7e279702be32af, \
+        0xca1c4f3bd1280cee \
+    }
+
+struct limine_file {
+    uint64_t revision;
+    LIMINE_PTR(void *) address;
+    uint64_t size;
+    LIMINE_PTR(char *) path;
+    LIMINE_PTR(char *) cmdline;
+};
+
+struct limine_module_response {
+    uint64_t revision;
+    uint64_t module_count;
+    LIMINE_PTR(struct limine_file **) modules;
+};
+
+struct limine_module_request {
+    uint64_t id[4];
+    uint64_t revision;
+    LIMINE_PTR(struct limine_module_response *) response;
+};
+
 #endif

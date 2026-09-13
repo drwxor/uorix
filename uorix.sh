@@ -4,7 +4,13 @@
 
 set -eu
 
-RUN_AS_ROOT=run0
+ROOTRUN=run0
+
+KERNEL=build/uorix.elf
+BOOTX64=/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI
+CODEFD=/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd
+IMG=image/uorix.img
+MNT=/tmp/uorix-mnt
 
 build() {
     echo "==> Building..."
@@ -27,37 +33,40 @@ build_scratch() {
 }
 
 replace() {
-    echo "==> Replacing kernel in image..."
+    echo "==> Remaking image..."
 
-    loopdev=$($RUN_AS_ROOT losetup --find --show --partscan image/uorix.img)
+    mkdir -p image
 
-    cleanup() {
-        $RUN_AS_ROOT umount /tmp/uorix-mnt 2>/dev/null || true
-        $RUN_AS_ROOT losetup -d "$loopdev" 2>/dev/null || true
-    }
+    rm -f "$IMG"
+    dd if=/dev/zero of="$IMG" bs=1M count=64
+    parted -s "$IMG" mklabel gpt
+    parted -s "$IMG" mkpart ESP fat32 1MiB 100%
+    parted -s "$IMG" set 1 esp on
 
-    trap cleanup EXIT
+    LOOP=$($ROOTRUN losetup --find --show --partscan "$IMG")
+    $ROOTRUN mkfs.fat -F 32 -n UORIX "${LOOP}p1"
 
-    $RUN_AS_ROOT mkdir -p /tmp/uorix-mnt
-    $RUN_AS_ROOT mount "${loopdev}p1" /tmp/uorix-mnt
-    $RUN_AS_ROOT cp build/uorix.elf /tmp/uorix-mnt/boot/uorix.elf
-    $RUN_AS_ROOT cp image/limine.conf /tmp/uorix-mnt/limine.conf
+    $ROOTRUN mkdir -p "$MNT"
+    $ROOTRUN mount "${LOOP}p1" "$MNT"
+    $ROOTRUN mkdir -p "$MNT/EFI/BOOT" "$MNT/boot"
+    $ROOTRUN cp "$BOOTX64" "$MNT/EFI/BOOT/BOOTX64.EFI"
+    $ROOTRUN cp "$KERNEL" "$MNT/boot/uorix.elf"
+    $ROOTRUN cp image/limine.conf "$MNT/limine.conf"
     sync
-
-    trap - EXIT
-    cleanup
+    $ROOTRUN umount "$MNT"
+    $ROOTRUN losetup -d "$LOOP"
+    sync
 }
 
 start() {
     echo "==> Starting QEMU..."
     qemu-system-x86_64 \
       -machine q35 \
-      -drive if=pflash,format=raw,readonly=on,file=/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd \
+      -m 512M \
+      -drive if=pflash,format=raw,readonly=on,file=$CODEFD \
       -drive format=raw,file=image/uorix.img \
-      -chardev stdio,id=serial0 \
-      -serial chardev:serial0 \
-      -no-reboot \
-      -no-shutdown
+      -serial stdio \
+      -no-reboot -no-shutdown
 }
 
 show_help() {

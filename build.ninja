@@ -3,17 +3,29 @@ ld = ld.lld
 
 cflags = -Iinclude -target x86_64-unknown-none -ffreestanding -fno-stack-protector -fno-pic -fno-pie -mno-red-zone -mno-sse -mno-sse2 -mcmodel=kernel -Wall -Wextra -O2
 
+ucflags = -Iinclude/libc -Iinclude/userland -target x86_64-unknown-none -ffreestanding -fno-builtin -fno-stack-protector -fno-pic -fno-pie -mno-red-zone -mno-sse -mno-sse2 -mcmodel=small -Wall -Wextra -O2
+
 rule cc
     command = $cc $cflags -c $in -o $out
     description = CC $in
+
+rule ucc
+    command = $cc $ucflags -c $in -o $out
+    description = UCC $in
 
 rule ld
     command = $ld -T linker.ld -o $out $in
     description = LD $out
 
+rule uld
+    command = $ld -T src/userland/user.ld -o $out $in
+    description = ULD $out
+
 rule asm
     command = clang -target x86_64-unknown-none -ffreestanding -c $in -o $out
     description = AS $in
+
+# kernel
 
 build build/entry.o: asm src/kernel/entry.S
 build build/isr.o: asm src/kernel/isr.S
@@ -27,8 +39,58 @@ build build/syscall.o: cc src/kernel/syscall.c
 build build/paging.o: cc src/kernel/paging.c
 build build/pmm.o: cc src/kernel/pmm.c
 build build/heap.o: cc src/kernel/heap.c
-build build/user.o: cc src/user/user.c
-build build/shell.o: cc src/shell/shell.c
+build build/elf.o: cc src/kernel/elf.c
+build build/user.o: cc src/kernel/user/user.c
+build build/shell.o: cc src/kernel/shell/shell.c
+
+# libc
+
+build build/libc/crt0.o: asm src/libc/crt0.S
+build build/libc/syscall.o: ucc src/libc/syscall.c
+build build/libc/errno.o: ucc src/libc/errno.c
+build build/libc/unistd.o: ucc src/libc/unistd.c
+build build/libc/string.o: ucc src/libc/string.c
+build build/libc/stdlib.o: ucc src/libc/stdlib.c
+build build/libc/stdio.o: ucc src/libc/stdio.c
+
+# userland elf
+
+build build/userland/init.o: ucc src/userland/init.c
+build build/userland/hello.o: ucc src/userland/hello.c
+build build/userland/shell.o: ucc src/userland/shell.c
+
+build build/userland_init.elf: uld $
+    build/libc/crt0.o $
+    build/libc/syscall.o $
+    build/libc/errno.o $
+    build/libc/unistd.o $
+    build/libc/string.o $
+    build/libc/stdlib.o $
+    build/libc/stdio.o $
+    build/userland/shell.o $
+    build/userland/init.o
+
+build build/userland_shell.elf: uld $
+    build/libc/crt0.o $
+    build/libc/syscall.o $
+    build/libc/errno.o $
+    build/libc/unistd.o $
+    build/libc/string.o $
+    build/libc/stdlib.o $
+    build/libc/stdio.o $
+    build/userland/shell.o
+
+build build/userland_hello.elf: uld $
+    build/libc/crt0.o $
+    build/libc/syscall.o $
+    build/libc/errno.o $
+    build/libc/unistd.o $
+    build/libc/string.o $
+    build/libc/stdlib.o $
+    build/libc/stdio.o $
+    build/userland/hello.o
+
+build build/init_elf.o: asm src/kernel/init_elf.S || build/userland_init.elf
 
 build build/uorix.elf: ld $
     build/entry.o $
@@ -43,6 +105,8 @@ build build/uorix.elf: ld $
     build/paging.o $
     build/pmm.o $
     build/heap.o $
+    build/elf.o $
+    build/init_elf.o $
     build/user.o $
     build/shell.o $
 
