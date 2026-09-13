@@ -14,8 +14,10 @@ syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4,
     (void)a4;
     (void)a5;
 
-    switch (nr) {
-    case SYS_READ: {
+    switch (nr)
+    {
+    case SYS_READ:
+    {
         char *buf = (char *)a1;
         if (a2 < 1)
             return 0;
@@ -23,7 +25,8 @@ syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4,
         return 1;
     }
 
-    case SYS_WRITE: {
+    case SYS_WRITE:
+    {
         const char *buf = (const char *)a1;
         uint64_t count  = a2;
         for (uint64_t i = 0; i < count; i++)

@@ -17,12 +17,16 @@ shell_command_mem(void)
     int i = 0;
     unsigned long n = (unsigned long)free_pages;
 
-    if (n == 0) {
+    if (n == 0)
+    {
         buf[i++] = '0';
-    } else {
+    }
+    else
+    {
         char tmp[20];
         int t = 0;
-        while (n > 0) {
+        while (n > 0)
+        {
             tmp[t++] = '0' + (n % 10);
             n /= 10;
         }

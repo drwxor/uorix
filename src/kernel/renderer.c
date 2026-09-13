@@ -307,7 +307,8 @@ uint8_t
     if (c >= '0' && c <= '9')
         return digits[c - '0'];
 
-    switch (c) {
+    switch (c)
+    {
     case ' ':
         return glyph_space;
 
@@ -374,7 +375,8 @@ render_clear(uint32_t color)
     if (framebuffer == 0)
         return;
 
-    for (uint64_t y = 0; y < framebuffer->height; y++) {
+    for (uint64_t y = 0; y < framebuffer->height; y++)
+    {
         uint32_t *row =
             (uint32_t *)(
                 (uint8_t *)framebuffer->address +
@@ -393,8 +395,10 @@ static
 void
 draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
 {
-    for (uint64_t row = 0; row < font_height; row++) {
-        for (uint64_t col = 0; col < font_width; col++) {
+    for (uint64_t row = 0; row < font_height; row++)
+    {
+        for (uint64_t col = 0; col < font_width; col++)
+        {
             if (g[row] & (1 << (7 - col)))
                 putpixel(x + col, y + row, foreground);
         }
@@ -442,7 +446,8 @@ render_putc(char c)
 
     cursor_x += font_width + font_spacing;
 
-    if (cursor_x + font_width >= framebuffer->width) {
+    if (cursor_x + font_width >= framebuffer->width)
+    {
         cursor_x = 32;
         cursor_y += font_height + font_spacing;
     }
@@ -465,12 +470,14 @@ render_uint(uint64_t value, uint32_t base)
     char buffer[32];
     uint32_t length = 0;
 
-    if (value == 0) {
+    if (value == 0)
+    {
         render_putc('0');
         return;
     }
 
-    while (value != 0) {
+    while (value != 0)
+    {
         uint32_t digit = value % base;
 
         if (digit < 10)
@@ -489,10 +496,13 @@ static
 void
 render_int(int64_t value)
 {
-    if (value < 0) {
+    if (value < 0)
+    {
         render_putc('-');
         render_uint((uint64_t)(-value), 10);
-    } else {
+    }
+    else
+    {
         render_uint((uint64_t)value, 10);
     }
 }
@@ -504,8 +514,10 @@ render_printf(const char *fmt, ...)
 
     va_start(args, fmt);
 
-    while (*fmt != '\0') {
-        if (*fmt != '%') {
+    while (*fmt != '\0')
+    {
+        if (*fmt != '%')
+        {
             render_putc(*fmt);
             fmt++;
             continue;
@@ -513,7 +525,8 @@ render_printf(const char *fmt, ...)
 
         fmt++;
 
-        switch (*fmt) {
+        switch (*fmt)
+        {
         case '%':
             render_putc('%');
             break;

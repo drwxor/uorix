@@ -22,7 +22,8 @@ static
 int
 strcmp_local(const char *a, const char *b)
 {
-    while (*a && *a == *b) {
+    while (*a && *a == *b)
+    {
         a++;
         b++;
     }
@@ -44,32 +45,38 @@ shell_execute(void)
     if (line_length == 0)
         return;
 
-    if (strcmp_local(line, "help") == 0) {
+    if (strcmp_local(line, "help") == 0)
+    {
         shell_command_help();
         return;
     }
 
-    if (strcmp_local(line, "clear") == 0) {
+    if (strcmp_local(line, "clear") == 0)
+    {
         shell_command_clear();
         return;
     }
 
-    if (strcmp_local(line, "uname") == 0) {
+    if (strcmp_local(line, "uname") == 0)
+    {
         shell_command_uname();
         return;
     }
 
-    if (strcmp_local(line, "exit") == 0) {
+    if (strcmp_local(line, "exit") == 0)
+    {
         shell_command_exit();
         return;
     }
 
-    if (strcmp_local(line, "info") == 0) {
+    if (strcmp_local(line, "info") == 0)
+    {
         shell_command_info();
         return;
     }
 
-    if (strcmp_local(line, "mem") == 0) {
+    if (strcmp_local(line, "mem") == 0)
+    {
         shell_command_mem();
         return;
     }
@@ -82,6 +89,18 @@ shell_execute(void)
         line[4] == ' ') {
         user_puts(line + 5);
         user_putc('\n');
+        return;
+    }
+
+    if (line_length >= 5 &&
+        line[0] == 'p' &&
+        line[1] == 'r' &&
+        line[2] == 'i' &&
+        line[3] == 'n' &&
+        line[4] == 't' &&
+        line[5] == 'f' &&
+        line[6] == ' ') {
+        user_puts(line + 7);
         return;
     }
 
@@ -101,10 +120,12 @@ shell_run(void)
 {
     user_puts("$ ");
 
-    for (;;) {
+    for (;;)
+    {
         char c = user_getc();
 
-        if (c == '\n') {
+        if (c == '\n')
+        {
             user_putc('\n');
             shell_execute();
             line_clear();
@@ -112,7 +133,8 @@ shell_run(void)
             continue;
         }
 
-        if (c == '\b') {
+        if (c == '\b')
+        {
             if (line_length > 0) {
                 line_length--;
                 line[line_length] = '\0';

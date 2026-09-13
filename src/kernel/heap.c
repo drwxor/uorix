@@ -34,26 +34,34 @@ freelist_add(struct block *b)
     struct block *prev = 0;
     struct block *cur  = free_list;
 
-    while (cur && cur < b) {
+    while (cur && cur < b)
+    {
         prev = cur;
         cur = cur->next;
     }
 
-    if (cur &&
-        (uint8_t *)b + HEADER_SIZE + b->size == (uint8_t *)cur) {
+    if (cur && (uint8_t *)b + HEADER_SIZE + b->size == (uint8_t *)cur)
+    {
         b->size += HEADER_SIZE + cur->size;
         b->next = cur->next;
-    } else {
+    }
+    else
+    {
         b->next = cur;
     }
 
     if (prev &&
-        (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b) {
+        (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b)
+    {
         prev->size += HEADER_SIZE + b->size;
         prev->next = b->next;
-    } else if (prev) {
+    }
+    else if (prev)
+    {
         prev->next = b;
-    } else {
+    }
+    else
+    {
         free_list = b;
     }
 }
@@ -67,7 +75,8 @@ heap_expand(size_t need)
 
     size_t pages = (total + PAGE_SIZE - 1) / PAGE_SIZE;
 
-    for (size_t i = 0; i < pages; i++) {
+    for (size_t i = 0; i < pages; i++)
+    {
         uint64_t phys = pmm_alloc_page();
         if (phys == 0)
             return -1;
@@ -106,8 +115,10 @@ void
         struct block *cur = free_list;
 
         while (cur) {
-            if (cur->size >= size) {
-                if (cur->size >= size + HEADER_SIZE + MIN_PAYLOAD) {
+            if (cur->size >= size)
+            {
+                if (cur->size >= size + HEADER_SIZE + MIN_PAYLOAD)
+                {
                     struct block *split = (struct block *)((uint8_t *)cur + HEADER_SIZE + size);
                     split->size = cur->size - size - HEADER_SIZE;
                     split->next = cur->next;
@@ -117,7 +128,9 @@ void
                         prev->next = split;
                     else
                         free_list = split;
-                } else {
+                }
+                else
+                {
                     if (prev)
                         prev->next = cur->next;
                     else
