@@ -125,7 +125,7 @@ struct limine_framebuffer_request {
     LIMINE_PTR(struct limine_framebuffer_response *) response;
 };
 
-/* Memory map ---------------------------------------------------------- */
+// memory map
 
 #define LIMINE_MEMMAP_REQUEST_ID \
     { \
@@ -161,7 +161,7 @@ struct limine_memmap_request {
     LIMINE_PTR(struct limine_memmap_response *) response;
 };
 
-/* Modules ------------------------------------------------------------- */
+// modules
 
 #define LIMINE_MODULE_REQUEST_ID \
     { \
