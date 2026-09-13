@@ -4,6 +4,8 @@
 
 set -eu
 
+RUN_AS_ROOT=run0
+
 build() {
     echo "==> Building..."
 
@@ -27,18 +29,19 @@ build_scratch() {
 replace() {
     echo "==> Replacing kernel in image..."
 
-    loopdev=$(run0 losetup --find --show --partscan image/uorix.img)
+    loopdev=$($RUN_AS_ROOT losetup --find --show --partscan image/uorix.img)
 
     cleanup() {
-        run0 umount /tmp/uorix-mnt 2>/dev/null || true
-        run0 losetup -d "$loopdev" 2>/dev/null || true
+        $RUN_AS_ROOT umount /tmp/uorix-mnt 2>/dev/null || true
+        $RUN_AS_ROOT losetup -d "$loopdev" 2>/dev/null || true
     }
 
     trap cleanup EXIT
 
-    run0 mount "${loopdev}p1" /tmp/uorix-mnt
-    run0 cp build/uorix.elf /tmp/uorix-mnt/boot/uorix.elf
-    run0 cp image/limine.conf /tmp/uorix-mnt/limine.conf
+    $RUN_AS_ROOT mkdir -p /tmp/uorix-mnt
+    $RUN_AS_ROOT mount "${loopdev}p1" /tmp/uorix-mnt
+    $RUN_AS_ROOT cp build/uorix.elf /tmp/uorix-mnt/boot/uorix.elf
+    $RUN_AS_ROOT cp image/limine.conf /tmp/uorix-mnt/limine.conf
     sync
 
     trap - EXIT
@@ -49,7 +52,7 @@ start() {
     echo "==> Starting QEMU..."
     qemu-system-x86_64 \
       -machine q35 \
-      -drive if=pflash,format=raw,readonly=on,file=/nix/store/50yl2vzad57dkkzyd3cwl8x8pfqaj50s-OVMF-202608-fd/FV/OVMF_CODE.fd \
+      -drive if=pflash,format=raw,readonly=on,file=/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd \
       -drive format=raw,file=image/uorix.img \
       -chardev stdio,id=serial0 \
       -serial chardev:serial0 \

@@ -83,13 +83,15 @@ paging_allow_user_access(void)
     uint64_t cr3 = read_cr3();
     uint64_t *pml4 = (uint64_t *)phys_to_virt(cr3 & PTE_ADDR_MASK);
 
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 512; i++)
+    {
         if (!(pml4[i] & PTE_PRESENT))
             continue;
         mark_user(&pml4[i]);
 
         uint64_t *pdpt = (uint64_t *)phys_to_virt(pml4[i] & PTE_ADDR_MASK);
-        for (int j = 0; j < 512; j++) {
+        for (int j = 0; j < 512; j++)
+        {
             if (!(pdpt[j] & PTE_PRESENT))
                 continue;
             mark_user(&pdpt[j]);
@@ -97,7 +99,8 @@ paging_allow_user_access(void)
                 continue;
 
             uint64_t *pd = (uint64_t *)phys_to_virt(pdpt[j] & PTE_ADDR_MASK);
-            for (int k = 0; k < 512; k++) {
+            for (int k = 0; k < 512; k++)
+            {
                 if (!(pd[k] & PTE_PRESENT))
                     continue;
                 mark_user(&pd[k]);
@@ -105,7 +108,8 @@ paging_allow_user_access(void)
                     continue;
 
                 uint64_t *pt = (uint64_t *)phys_to_virt(pd[k] & PTE_ADDR_MASK);
-                for (int l = 0; l < 512; l++) {
+                for (int l = 0; l < 512; l++)
+                {
                     if (pt[l] & PTE_PRESENT)
                         mark_user(&pt[l]);
                 }
@@ -159,7 +163,8 @@ paging_map_page_in(uint64_t pml4_phys, uint64_t virt, uint64_t phys, uint64_t fl
     uint64_t pd_i = (virt >> 21) & 0x1FF;
     uint64_t pt_i = (virt >> 12) & 0x1FF;
 
-    if (!(pml4[pml4_i] & PTE_PRESENT)) {
+    if (!(pml4[pml4_i] & PTE_PRESENT))
+    {
         uint64_t page = pmm_alloc_page();
         if (page == 0)
             return -1;
@@ -169,25 +174,31 @@ paging_map_page_in(uint64_t pml4_phys, uint64_t virt, uint64_t phys, uint64_t fl
 
     uint64_t *pdpt = (uint64_t *)phys_to_virt(pml4[pml4_i] & PTE_ADDR_MASK);
 
-    if (!(pdpt[pdpt_i] & PTE_PRESENT)) {
+    if (!(pdpt[pdpt_i] & PTE_PRESENT))
+    {
         uint64_t page = pmm_alloc_page();
         if (page == 0)
             return -1;
         zero_page(page);
         pdpt[pdpt_i] = page | PTE_PRESENT | PTE_WRITE | (flags & PTE_USER);
-    } else if (pdpt[pdpt_i] & PTE_PS) {
+    }
+    else if (pdpt[pdpt_i] & PTE_PS)
+    {
         return -1;
     }
 
     uint64_t *pd = (uint64_t *)phys_to_virt(pdpt[pdpt_i] & PTE_ADDR_MASK);
 
-    if (!(pd[pd_i] & PTE_PRESENT)) {
+    if (!(pd[pd_i] & PTE_PRESENT))
+    {
         uint64_t page = pmm_alloc_page();
         if (page == 0)
             return -1;
         zero_page(page);
         pd[pd_i] = page | PTE_PRESENT | PTE_WRITE | (flags & PTE_USER);
-    } else if (pd[pd_i] & PTE_PS) {
+    }
+    else if (pd[pd_i] & PTE_PS)
+    {
         return -1;
     }
 
@@ -245,7 +256,8 @@ paging_create_user_as(uint64_t *user_stack_top)
         user_pml4[i] = kernel_pml4[i];
 
     uint64_t stack_bottom = USER_STACK_VIRT - USER_STACK_PAGES * PAGE_SIZE;
-    for (uint64_t i = 0; i < USER_STACK_PAGES; i++) {
+    for (uint64_t i = 0; i < USER_STACK_PAGES; i++)
+    {
         uint64_t phys = pmm_alloc_page();
         if (phys == 0)
             return 0;
