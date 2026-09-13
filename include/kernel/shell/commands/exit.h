@@ -3,7 +3,7 @@
 #ifndef UORIX_SHELL_EXIT_H
 #define UORIX_SHELL_EXIT_H
 
-#include "user/user.h"
+#include "kernel/user/user.h"
 #include "kernel/syscall.h"
 
 static

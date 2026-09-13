@@ -1,15 +1,15 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 
-#include "shell/shell.h"
+#include "kernel/shell/shell.h"
 
-#include "user/user.h"
+#include "kernel/user/user.h"
 
-#include "shell/commands/clear.h"
-#include "shell/commands/help.h"
-#include "shell/commands/info.h"
-#include "shell/commands/uname.h"
-#include "shell/commands/exit.h"
-#include "shell/commands/mem.h"
+#include "kernel/shell/commands/clear.h"
+#include "kernel/shell/commands/help.h"
+#include "kernel/shell/commands/info.h"
+#include "kernel/shell/commands/uname.h"
+#include "kernel/shell/commands/exit.h"
+#include "kernel/shell/commands/mem.h"
 
 #include <stdint.h>
 

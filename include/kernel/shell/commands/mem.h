@@ -3,7 +3,7 @@
 #ifndef UORIX_SHELL_MEM_H
 #define UORIX_SHELL_MEM_H
 
-#include "user/user.h"
+#include "kernel/user/user.h"
 #include "kernel/syscall.h"
 
 #define SYS_MEMINFO 3

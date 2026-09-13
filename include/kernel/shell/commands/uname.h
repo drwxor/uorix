@@ -3,7 +3,7 @@
 #ifndef UORIX_SHELL_UNAME_H
 #define UORIX_SHELL_UNAME_H
 
-#include "user/user.h"
+#include "kernel/user/user.h"
 
 static
 void

@@ -87,17 +87,23 @@ pmm_init(struct limine_memmap_response *memmap, uint64_t hhdm)
 
     bitmap_pages = (highest + PAGE_SIZE - 1) / PAGE_SIZE;
     uint64_t bitmap_bytes = (bitmap_pages + 7) / 8;
-    uint64_t bitmap_pages_needed =
-        (bitmap_bytes + PAGE_SIZE - 1) / PAGE_SIZE;
+    uint64_t bitmap_pages_needed = (bitmap_bytes + PAGE_SIZE - 1) / PAGE_SIZE;
 
     uint64_t bitmap_phys = 0;
+    render_printf("pmm: memmap entries: %u\n", memmap->entry_count);
     for (uint64_t i = 0; i < memmap->entry_count; i++) {
         struct limine_memmap_entry *e = memmap->entries[i];
-        if (e->type != LIMINE_MEMMAP_USABLE)
+        if (e->type != LIMINE_MEMMAP_USABLE) {
+            render_printf("pmm: %u is not usable memmap\n", e->type);
             continue;
+        }
+
         if (e->length >= bitmap_pages_needed * PAGE_SIZE) {
-            bitmap_phys = e->base;
+            render_printf("pmm: room for bitmap: %u (%u required)\n", e->length, bitmap_pages_needed * PAGE_SIZE);
+            bitmap_phys = e->length;
             break;
+        } else {
+            render_printf("pmm: memmap length (%u) doesnt have enough %u\n", e->length, bitmap_pages_needed * PAGE_SIZE);
         }
     }
 
@@ -118,7 +124,7 @@ pmm_init(struct limine_memmap_response *memmap, uint64_t hhdm)
             continue;
 
         uint64_t start = (e->base + PAGE_SIZE - 1) / PAGE_SIZE;
-        uint64_t end   = (e->base + e->length) / PAGE_SIZE;
+        uint64_t end = (e->base + e->length) / PAGE_SIZE;
 
         if (end > bitmap_pages)
             end = bitmap_pages;

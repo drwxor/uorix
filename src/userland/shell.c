@@ -1,0 +1,160 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+
+#include "shell.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+
+static const char *logo[] = {
+    "u u  oo  rr  i x x",
+    "u u o  o r r i  x ",
+    "u u o  o rr  i x x",
+    "uuu  oo  r r      ",
+    0
+};
+
+static
+void
+cmd_help(void)
+{
+    printf("commands:\n");
+    printf("\thelp     show this message\n");
+    printf("\tclear    clear the screen\n");
+    printf("\techo     print text\n");
+    printf("\tuname    show system name\n");
+    printf("\tinfo     show system info\n");
+    printf("\tmem      show free physical pages\n");
+    printf("\tmalloc   exercise libc malloc\n");
+    printf("\texit     leave the shell\n");
+}
+
+static
+void
+cmd_mem(void)
+{
+    long pages = syscall0(SYS_MEMINFO);
+    printf("free pages: %d\n", (int)pages);
+}
+
+static
+void
+cmd_malloc(void)
+{
+    char *p = malloc(64);
+    if (!p)
+    {
+        printf("malloc failed\n");
+        return;
+    }
+    strcpy(p, "heap ok");
+    printf("malloc: %s at %p\n", p, (void *)p);
+    free(p);
+}
+
+static
+void
+cmd_info(void)
+{
+    printf("\n");
+
+    for (int i = 0; logo[i] != 0; i++) {
+        printf(logo[i]);
+
+        if (i == 0)
+            printf("\tuorix x86_64");
+
+        if (i == 1)
+            printf("\tkernel: uorix");
+
+        if (i == 2)
+            printf("\tshell: uorix");
+
+        if (i == 3)
+            printf("\tbootloader: limine");
+
+        printf("\n");
+    }
+
+    printf("\n");
+}
+
+int
+run_shell(void)
+{
+    char line[128];
+    int len;
+
+    printf("$ ");
+
+    len = 0;
+    line[0] = 0;
+
+    for (;;)
+    {
+        int c = getchar();
+        if (c == EOF)
+            continue;
+
+        if (c == '\n')
+        {
+            putchar('\n');
+            line[len] = 0;
+
+            if (len == 0)
+            {
+                printf("$ ");
+                continue;
+            }
+
+            if (strcmp(line, "help") == 0)
+                cmd_help();
+            else if (strcmp(line, "clear") == 0)
+                syscall0(SYS_CLEAR);
+            else if (strcmp(line, "uname") == 0)
+                printf("uorix x86_64\n");
+            else if (strcmp(line, "mem") == 0)
+                cmd_mem();
+            else if (strcmp(line, "malloc") == 0)
+                cmd_malloc();
+            else if (strcmp(line, "info") == 0)
+                cmd_info();
+            else if (strcmp(line, "exit") == 0)
+            {
+                printf("bye\n");
+                return 0;
+            }
+            else if (strncmp(line, "echo ", 5) == 0)
+                printf("%s\n", line + 5);
+            else
+                printf("uorix: command not found: %s\n", line);
+
+            len = 0;
+            line[0] = 0;
+            printf("$ ");
+            continue;
+        }
+
+        if (c == '\b')
+        {
+            if (len > 0)
+            {
+                len--;
+                line[len] = 0;
+                putchar('\b');
+            }
+            continue;
+        }
+
+        if (c < 32)
+            continue;
+
+        if (len < (int)sizeof(line) - 1)
+        {
+            line[len++] = (char)c;
+            putchar(c);
+        }
+    }
+}
