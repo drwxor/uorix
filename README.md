@@ -49,7 +49,7 @@ The helper script is intended for local development and testing only. It contain
 ## Shell
 
 ~~The current shell is built directly into the kernel.~~
-###### well it kinda is but not quite from now on
+###### its quite not from now on
 
 ## Design
 
@@ -66,7 +66,7 @@ Current development uses:
 
 * Clang
 * LLD
-* samurai/samu
+* samurai
 * QEMU
 * OVMF
 * Limine
