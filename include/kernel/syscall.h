@@ -5,12 +5,12 @@
 
 #include <stdint.h>
 
-#define SYS_READ    0
-#define SYS_WRITE   1
-#define SYS_CLEAR   2
+#define SYS_READ 0
+#define SYS_WRITE 1
+#define SYS_CLEAR 2
 #define SYS_MEMINFO 3
-#define SYS_BRK     12
-#define SYS_EXIT    60
+#define SYS_BRK 12
+#define SYS_EXIT 60
 
 long syscall0(long n);
 long syscall1(long n, long a1);

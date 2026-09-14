@@ -27,91 +27,92 @@ rule asm
 
 # kernel
 
-build build/entry.o: asm src/kernel/entry.S
-build build/isr.o: asm src/kernel/isr.S
-build build/user_entry.o: asm src/kernel/user_entry.S
-build build/main.o: cc src/kernel/main.c
-build build/renderer.o: cc src/kernel/renderer.c
-build build/driver/keyboard.o: cc src/kernel/driver/keyboard.c
-build build/gdt.o: cc src/kernel/gdt.c
-build build/idt.o: cc src/kernel/idt.c
-build build/syscall.o: cc src/kernel/syscall.c
-build build/paging.o: cc src/kernel/paging.c
-build build/pmm.o: cc src/kernel/pmm.c
-build build/heap.o: cc src/kernel/heap.c
-build build/elf.o: cc src/kernel/elf.c
-build build/ata.o: cc src/kernel/ata.c
-build build/fs/ext2.o: cc src/kernel/fs/ext2.c
-build build/user.o: cc src/kernel/user/user.c
-build build/shell.o: cc src/kernel/shell/shell.c
+build build/object/entry.o: asm src/kernel/entry.S
+build build/object/isr.o: asm src/kernel/isr.S
+build build/object/user_entry.o: asm src/kernel/user_entry.S
+build build/object/main.o: cc src/kernel/main.c
+build build/object/renderer.o: cc src/kernel/renderer.c
+build build/object/driver/keyboard.o: cc src/kernel/driver/keyboard.c
+build build/object/gdt.o: cc src/kernel/gdt.c
+build build/object/idt.o: cc src/kernel/idt.c
+build build/object/syscall.o: cc src/kernel/syscall.c
+build build/object/paging.o: cc src/kernel/paging.c
+build build/object/pmm.o: cc src/kernel/pmm.c
+build build/object/heap.o: cc src/kernel/heap.c
+build build/object/elf.o: cc src/kernel/elf.c
+build build/object/ata.o: cc src/kernel/ata.c
+build build/object/fs/ext2.o: cc src/kernel/fs/ext2.c
+build build/object/user.o: cc src/kernel/user/user.c
+build build/object/shell.o: cc src/kernel/shell/shell.c
 
 # libc
 
-build build/libc/crt0.o: asm src/libc/crt0.S
-build build/libc/syscall.o: ucc src/libc/syscall.c
-build build/libc/errno.o: ucc src/libc/errno.c
-build build/libc/unistd.o: ucc src/libc/unistd.c
-build build/libc/string.o: ucc src/libc/string.c
-build build/libc/stdlib.o: ucc src/libc/stdlib.c
-build build/libc/stdio.o: ucc src/libc/stdio.c
+build build/object/libc/crt0.o: asm src/libc/crt0.S
+build build/object/libc/syscall.o: ucc src/libc/syscall.c
+build build/object/libc/errno.o: ucc src/libc/errno.c
+build build/object/libc/unistd.o: ucc src/libc/unistd.c
+build build/object/libc/string.o: ucc src/libc/string.c
+build build/object/libc/stdlib.o: ucc src/libc/stdlib.c
+build build/object/libc/stdio.o: ucc src/libc/stdio.c
 
 # userland elf
 
-build build/userland/init.o: ucc src/userland/init.c
-build build/userland/hello.o: ucc src/userland/hello.c
-build build/userland/shell.o: ucc src/userland/shell.c
+build build/object/userland/init.o: ucc src/userland/init.c
+build build/object/userland/hello.o: ucc src/userland/hello.c
+build build/object/userland/shell.o: ucc src/userland/shell.c
 
-build build/userland_init.elf: uld $
-    build/libc/crt0.o $
-    build/libc/syscall.o $
-    build/libc/errno.o $
-    build/libc/unistd.o $
-    build/libc/string.o $
-    build/libc/stdlib.o $
-    build/libc/stdio.o $
-    build/userland/shell.o $
-    build/userland/init.o
+build build/userland/init.elf: uld $
+    build/object/libc/crt0.o $
+    build/object/libc/syscall.o $
+    build/object/libc/errno.o $
+    build/object/libc/unistd.o $
+    build/object/libc/string.o $
+    build/object/libc/stdlib.o $
+    build/object/libc/stdio.o $
+    build/object/userland/init.o
 
-build build/userland_shell.elf: uld $
-    build/libc/crt0.o $
-    build/libc/syscall.o $
-    build/libc/errno.o $
-    build/libc/unistd.o $
-    build/libc/string.o $
-    build/libc/stdlib.o $
-    build/libc/stdio.o $
-    build/userland/shell.o
+build build/userland/shell.elf: uld $
+    build/object/libc/crt0.o $
+    build/object/libc/syscall.o $
+    build/object/libc/errno.o $
+    build/object/libc/unistd.o $
+    build/object/libc/string.o $
+    build/object/libc/stdlib.o $
+    build/object/libc/stdio.o $
+    build/object/userland/shell.o
 
-build build/userland_hello.elf: uld $
-    build/libc/crt0.o $
-    build/libc/syscall.o $
-    build/libc/errno.o $
-    build/libc/unistd.o $
-    build/libc/string.o $
-    build/libc/stdlib.o $
-    build/libc/stdio.o $
-    build/userland/hello.o
+build build/userland/hello.elf: uld $
+    build/object/libc/crt0.o $
+    build/object/libc/syscall.o $
+    build/object/libc/errno.o $
+    build/object/libc/unistd.o $
+    build/object/libc/string.o $
+    build/object/libc/stdlib.o $
+    build/object/libc/stdio.o $
+    build/object/userland/hello.o
 
-build build/init_elf.o: asm src/kernel/init_elf.S || build/userland_init.elf
+build build/object/init/elf.o: asm src/kernel/init_elf.S || build/userland/init.elf
 
 build build/uorix.elf: ld $
-    build/entry.o $
-    build/isr.o $
-    build/user_entry.o $
-    build/main.o $
-    build/renderer.o $
-    build/driver/keyboard.o $
-    build/gdt.o $
-    build/idt.o $
-    build/syscall.o $
-    build/paging.o $
-    build/pmm.o $
-    build/heap.o $
-    build/elf.o $
-    build/ata.o $
-    build/fs/ext2.o $
-    build/init_elf.o $
-    build/user.o $
-    build/shell.o $
+    build/object/entry.o $
+    build/object/isr.o $
+    build/object/user_entry.o $
+    build/object/main.o $
+    build/object/renderer.o $
+    build/object/driver/keyboard.o $
+    build/object/gdt.o $
+    build/object/idt.o $
+    build/object/syscall.o $
+    build/object/paging.o $
+    build/object/pmm.o $
+    build/object/heap.o $
+    build/object/elf.o $
+    build/object/ata.o $
+    build/object/fs/ext2.o $
+    build/object/init/elf.o $
+    build/object/user.o $
+    build/object/shell.o
 
-default build/uorix.elf
+default build/uorix.elf $
+    build/userland/shell.elf $
+    build/userland/hello.elf

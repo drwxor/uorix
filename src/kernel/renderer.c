@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include "kernel/io.h"
+
 static struct limine_framebuffer *framebuffer;
 
 static uint64_t cursor_x;
@@ -316,6 +318,17 @@ static const uint8_t glyph_rparen[8] = {
     0x00
 };
 
+#define COM1 0x3F8
+
+static void
+serial_putc(char c)
+{
+    while (!(inb(COM1 + 5) & 0x20))
+        ;
+
+    outb(COM1, c);
+}
+
 static const
 uint8_t
 *glyph(char c)
@@ -436,6 +449,8 @@ draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
 void
 render_putc(char c)
 {
+    serial_putc(c);
+
     if (framebuffer == 0)
         return;
 

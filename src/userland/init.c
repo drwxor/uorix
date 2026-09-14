@@ -4,12 +4,9 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 
-#include "shell.h"
-
 int
 main(void)
 {
     printf("userspace ready\n");
-
-    return run_shell();
+    return 0;
 }

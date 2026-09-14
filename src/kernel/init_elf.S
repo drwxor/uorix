@@ -5,5 +5,5 @@
 .global init_elf_start
 .global init_elf_end
 init_elf_start:
-    .incbin "build/userland_init.elf"
+    .incbin "build/userland/init.elf"
 init_elf_end:

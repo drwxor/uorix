@@ -132,11 +132,13 @@ kmain(void)
         {
             void *file_buf = 0;
             uint64_t file_size = ext2_read_file(fs, "/bin/sh", &file_buf);
-            if (file_size != (uint64_t)-1 && file_buf) {
-                render_printf("elf: loading /bin/sh from ext2 (%u bytes)\n",
-                              (uint32_t)file_size);
+            if (file_size != (uint64_t)-1 && file_buf)
+            {
+                render_printf("elf: loading /bin/sh from ext2 (%u bytes)\n", (uint32_t)file_size);
                 loaded = try_load_elf(file_buf, file_size, user_pml4, &entry, &brk);
-            } else {
+            }
+            else
+            {
                 render_printf("ext2: /bin/sh not found or unreadable\n");
             }
             ext2_unmount(fs);

@@ -5,6 +5,7 @@
 #include "kernel/driver/keyboard.h"
 #include "kernel/pmm.h"
 #include "kernel/elf.h"
+#include "kernel/fs/ext2.h"
 
 #include <stdint.h>
 
@@ -29,7 +30,7 @@ syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4,
     case SYS_WRITE:
     {
         const char *buf = (const char *)a1;
-        uint64_t count  = a2;
+        uint64_t count = a2;
         for (uint64_t i = 0; i < count; i++)
             render_putc(buf[i]);
         return count;

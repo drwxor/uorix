@@ -1,7 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 
-#include "shell.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,7 +80,7 @@ cmd_info(void)
 }
 
 int
-run_shell(void)
+main(void)
 {
     char line[128];
     int len;
