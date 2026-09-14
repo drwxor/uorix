@@ -4,10 +4,7 @@
 
 #include "kernel/user/user.h"
 
-#include "kernel/shell/commands/clear.h"
 #include "kernel/shell/commands/help.h"
-#include "kernel/shell/commands/info.h"
-#include "kernel/shell/commands/uname.h"
 #include "kernel/shell/commands/exit.h"
 #include "kernel/shell/commands/mem.h"
 
@@ -51,27 +48,9 @@ shell_execute(void)
         return;
     }
 
-    if (strcmp_local(line, "clear") == 0)
-    {
-        shell_command_clear();
-        return;
-    }
-
-    if (strcmp_local(line, "uname") == 0)
-    {
-        shell_command_uname();
-        return;
-    }
-
     if (strcmp_local(line, "exit") == 0)
     {
         shell_command_exit();
-        return;
-    }
-
-    if (strcmp_local(line, "info") == 0)
-    {
-        shell_command_info();
         return;
     }
 

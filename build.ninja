@@ -32,7 +32,7 @@ build build/isr.o: asm src/kernel/isr.S
 build build/user_entry.o: asm src/kernel/user_entry.S
 build build/main.o: cc src/kernel/main.c
 build build/renderer.o: cc src/kernel/renderer.c
-build build/keyboard.o: cc src/kernel/keyboard.c
+build build/driver/keyboard.o: cc src/kernel/driver/keyboard.c
 build build/gdt.o: cc src/kernel/gdt.c
 build build/idt.o: cc src/kernel/idt.c
 build build/syscall.o: cc src/kernel/syscall.c
@@ -40,6 +40,8 @@ build build/paging.o: cc src/kernel/paging.c
 build build/pmm.o: cc src/kernel/pmm.c
 build build/heap.o: cc src/kernel/heap.c
 build build/elf.o: cc src/kernel/elf.c
+build build/ata.o: cc src/kernel/ata.c
+build build/fs/ext2.o: cc src/kernel/fs/ext2.c
 build build/user.o: cc src/kernel/user/user.c
 build build/shell.o: cc src/kernel/shell/shell.c
 
@@ -98,7 +100,7 @@ build build/uorix.elf: ld $
     build/user_entry.o $
     build/main.o $
     build/renderer.o $
-    build/keyboard.o $
+    build/driver/keyboard.o $
     build/gdt.o $
     build/idt.o $
     build/syscall.o $
@@ -106,6 +108,8 @@ build build/uorix.elf: ld $
     build/pmm.o $
     build/heap.o $
     build/elf.o $
+    build/ata.o $
+    build/fs/ext2.o $
     build/init_elf.o $
     build/user.o $
     build/shell.o $

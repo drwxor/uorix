@@ -11,6 +11,8 @@
 #include "kernel/heap.h"
 #include "kernel/syscall.h"
 #include "kernel/elf.h"
+#include "kernel/ata.h"
+#include "kernel/fs/ext2.h"
 #include "kernel/shell/shell.h"
 
 __attribute__((used, section(".limine_requests")))
@@ -67,7 +69,8 @@ kmain(void)
 {
     struct limine_framebuffer_response *fb_resp = framebuffer_request.response;
 
-    if (fb_resp == 0 || fb_resp->framebuffer_count == 0) {
+    if (fb_resp == 0 || fb_resp->framebuffer_count == 0)
+    {
         for (;;)
             __asm__ volatile ("hlt");
     }
@@ -103,7 +106,8 @@ kmain(void)
 
     uint64_t user_stack_top = 0;
     uint64_t user_pml4 = paging_create_user_as(&user_stack_top);
-    if (user_pml4 == 0) {
+    if (user_pml4 == 0)
+    {
         render_printf("unable to create user\n");
         render_printf("falling back to kernel shell\n");
         static uint8_t fallback_stack[16384] __attribute__((aligned(16)));
@@ -120,20 +124,45 @@ kmain(void)
     uint64_t brk = 0;
     int loaded = -1;
 
-    if (module_request.response != 0 &&
-        module_request.response->module_count > 0) {
+    if (ata_init() == 0)
+    {
+        const uint32_t EXT2_START_LBA = 67584;
+        struct ext2_fs *fs = ext2_mount(EXT2_START_LBA);
+        if (fs)
+        {
+            void *file_buf = 0;
+            uint64_t file_size = ext2_read_file(fs, "/bin/sh", &file_buf);
+            if (file_size != (uint64_t)-1 && file_buf) {
+                render_printf("elf: loading /bin/sh from ext2 (%u bytes)\n",
+                              (uint32_t)file_size);
+                loaded = try_load_elf(file_buf, file_size, user_pml4, &entry, &brk);
+            } else {
+                render_printf("ext2: /bin/sh not found or unreadable\n");
+            }
+            ext2_unmount(fs);
+        }
+        else
+        {
+            render_printf("ext2: unable to find a ext2 file system\n");
+        }
+    }
+
+    if (loaded != 0 && module_request.response != 0 && module_request.response->module_count > 0)
+    {
         struct limine_file *mod = module_request.response->modules[0];
         render_printf("elf: loading module (%u bytes)\n", mod->size);
         loaded = try_load_elf(mod->address, mod->size, user_pml4, &entry, &brk);
     }
 
-    if (loaded != 0) {
+    if (loaded != 0)
+    {
         uint64_t embedded = (uint64_t)(init_elf_end - init_elf_start);
         render_printf("elf: loading embedded init (%u bytes)\n", embedded);
         loaded = try_load_elf(init_elf_start, embedded, user_pml4, &entry, &brk);
     }
 
-    if (loaded != 0) {
+    if (loaded != 0)
+    {
         render_printf("elf: load failed, kernel shell\n");
         shell_init();
         user_enter((uint64_t)shell_run, user_stack_top);
