@@ -1,20 +1,19 @@
 #!/bin/sh
 
-# this was written by ai because i dont want to spend time doing a shell script to SAVE time.
+# Development helper for Uorix – single ESP (works with OVMF)
 
 set -eu
 
-ROOTRUN=run0
+ROOTRUN=${ROOTRUN:-run0}
 
 KERNEL=build/uorix.elf
-BOOTX64=/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI
-CODEFD=/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd
+BOOTX64=${BOOTX64:-/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI}
+CODEFD=${CODEFD:-/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd}
 IMG=image/uorix.img
 MNT=/tmp/uorix-mnt
 
 build() {
     echo "==> Building..."
-
     if ! output=$(samu 2>&1); then
         printf '%s\n' "$output" >&2
         return 1
@@ -22,10 +21,8 @@ build() {
 }
 
 build_scratch() {
-    echo "==> Building..."
-
+    echo "==> Building from scratch..."
     rm -rf build/*
-
     if ! output=$(samu 2>&1); then
         printf '%s\n' "$output" >&2
         return 1
@@ -33,53 +30,84 @@ build_scratch() {
 }
 
 replace() {
-    echo "==> Remaking image..."
+    echo "==> Remaking image (single ESP)..."
 
     mkdir -p image
 
+    if [ ! -f "$KERNEL" ]; then
+        echo "Error: $KERNEL not found – run ./uorix.sh -b first" >&2
+        return 1
+    fi
+    if [ ! -f "$BOOTX64" ]; then
+        echo "Error: $BOOTX64 not found" >&2
+        return 1
+    fi
+
     rm -f "$IMG"
-    dd if=/dev/zero of="$IMG" bs=1M count=64
+    dd if=/dev/zero of="$IMG" bs=1M count=64 status=none
+
     parted -s "$IMG" mklabel gpt
     parted -s "$IMG" mkpart ESP fat32 1MiB 100%
     parted -s "$IMG" set 1 esp on
 
     LOOP=$($ROOTRUN losetup --find --show --partscan "$IMG")
-    $ROOTRUN mkfs.fat -F 32 -n UORIX "${LOOP}p1"
+    sleep 0.5
+
+    ESP="${LOOP}p1"
+    if [ ! -b "$ESP" ]; then
+        echo "Error: $ESP did not appear" >&2
+        $ROOTRUN losetup -d "$LOOP" || true
+        return 1
+    fi
+
+    $ROOTRUN mkfs.fat -F 32 -n UORIX "$ESP"
 
     $ROOTRUN mkdir -p "$MNT"
-    $ROOTRUN mount "${LOOP}p1" "$MNT"
+    $ROOTRUN mount "$ESP" "$MNT"
     $ROOTRUN mkdir -p "$MNT/EFI/BOOT" "$MNT/boot"
+
     $ROOTRUN cp "$BOOTX64" "$MNT/EFI/BOOT/BOOTX64.EFI"
-    $ROOTRUN cp "$KERNEL" "$MNT/boot/uorix.elf"
-    $ROOTRUN cp image/limine.conf "$MNT/limine.conf"
+    $ROOTRUN cp "$KERNEL"  "$MNT/boot/uorix.elf"
+
+    cat > /tmp/uorix-limine.conf << 'EOF'
+timeout: 1
+
+/Uorix
+    protocol: limine
+    path: boot():/boot/uorix.elf
+EOF
+    $ROOTRUN cp /tmp/uorix-limine.conf "$MNT/limine.conf"
+
     sync
     $ROOTRUN umount "$MNT"
     $ROOTRUN losetup -d "$LOOP"
     sync
+
+    echo "==> Image ready: $IMG (single ESP)"
 }
 
 start() {
     echo "==> Starting QEMU..."
     qemu-system-x86_64 \
-      -machine q35 \
-      -m 512M \
-      -drive if=pflash,format=raw,readonly=on,file=$CODEFD \
-      -drive format=raw,file=image/uorix.img \
-      -serial stdio \
-      -no-reboot -no-shutdown
+        -machine q35 \
+        -m 512M \
+        -drive if=pflash,format=raw,readonly=on,file="$CODEFD" \
+        -drive format=raw,file="$IMG" \
+        -serial stdio \
+        -no-reboot -no-shutdown
 }
 
 show_help() {
     echo "Usage: $0 [options]"
     echo ""
     echo "Options:"
-    echo "  -b, --build    Run build (samu)"
-    echo "  -B, --build-scr    Run build from scratch (samu)"
-    echo "  -r, --replace  Mount image and replace uorix.elf"
-    echo "  -R, --run      Boot QEMU"
-    echo "  -h, --help     Show this menu"
+    echo "  -b, --build       Build (samu)"
+    echo "  -B, --build-scr   Build from scratch"
+    echo "  -r, --replace     Recreate disk image"
+    echo "  -R, --run         Boot in QEMU"
+    echo "  -h, --help        Show this help"
     echo ""
-    echo "Note: Short flags can be combined (e.g., -brR)"
+    echo "Short flags can be combined (e.g. -brR)"
 }
 
 if [ $# -eq 0 ]; then
@@ -89,83 +117,35 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        -h|--help)
-            show_help
-            exit 0
-            ;;
-
-        --build)
-            build
-            ;;
-
-        --build-scr)
-            build_scratch
-            ;;
-
-        --replace)
-            replace
-            ;;
-
-        --run)
-            start
-            ;;
-
-        -b|-B|-r|-R)
-            case "$1" in
-                -b)
-                    build
-                    ;;
-                -b)
-                    build_scratch
-                    ;;
-                -r)
-                    replace
-                    ;;
-                -R)
-                    start
-                    ;;
-            esac
-            ;;
-
+        -h|--help)    show_help; exit 0 ;;
+        --build)      build ;;
+        --build-scr)  build_scratch ;;
+        --replace)    replace ;;
+        --run)        start ;;
         -[!-]*)
             flags=${1#-}
-
             while [ -n "$flags" ]; do
                 flag=${flags%"${flags#?}"}
                 flags=${flags#?}
-
                 case "$flag" in
-                    b)
-                        build
-                        ;;
-                    B)
-                        build_scratch
-                        ;;
-                    r)
-                        replace
-                        ;;
-                    R)
-                        start
-                        ;;
-                    h)
-                        show_help
-                        exit 0
-                        ;;
+                    b) build ;;
+                    B) build_scratch ;;
+                    r) replace ;;
+                    R) start ;;
+                    h) show_help; exit 0 ;;
                     *)
-                        echo "Error: Unknown option '-$flag'" >&2
+                        echo "Error: unknown option '-$flag'" >&2
                         show_help
                         exit 1
                         ;;
                 esac
             done
             ;;
-
         *)
-            echo "Error: Unknown option '$1'" >&2
+            echo "Error: unknown option '$1'" >&2
             show_help
             exit 1
             ;;
     esac
-
     shift
 done

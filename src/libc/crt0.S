@@ -11,7 +11,7 @@ _start:
     and  $~0xF, %rsp
     call main
     mov  %eax, %edi
-    mov  $60, %eax          /* SYS_EXIT */
+    mov  $60, %eax
     int  $0x80
 .hang:
     hlt

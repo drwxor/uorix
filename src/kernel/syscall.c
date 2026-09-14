@@ -2,7 +2,7 @@
 
 #include "kernel/syscall.h"
 #include "kernel/renderer.h"
-#include "kernel/keyboard.h"
+#include "kernel/driver/keyboard.h"
 #include "kernel/pmm.h"
 #include "kernel/elf.h"
 

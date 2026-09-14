@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 
-#include "kernel/keyboard.h"
+#include "kernel/driver/keyboard.h"
 
 #include <stdint.h>
 
