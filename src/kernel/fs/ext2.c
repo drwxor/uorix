@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+struct ext2_fs *rootfs;
+
 void *memcpy(void *dest, const void *src, size_t n) {
     unsigned char *d = dest;
     const unsigned char *s = src;
@@ -17,7 +19,6 @@ void *memcpy(void *dest, const void *src, size_t n) {
     }
     return dest;
 }
-
 
 #define EXT2_SUPER_MAGIC 0xEF53
 
@@ -130,11 +131,16 @@ struct ext2_fs *
 ext2_mount(uint32_t start_lba)
 {
     uint8_t sector[1024];
+
+    render_printf("ext2: reading LBA %u\n", start_lba + 2);
+
     if (ata_read_sectors(start_lba + 2, 2, sector) != 0)
     {
         render_printf("ext2: failed to read superblock\n");
         return 0;
     }
+
+    render_printf("ext2: magic=0x%x\n", *(uint16_t *)(sector + 56));
 
     struct ext2_superblock *sb = (struct ext2_superblock *)sector;
     if (sb->s_magic != EXT2_SUPER_MAGIC)
@@ -145,7 +151,10 @@ ext2_mount(uint32_t start_lba)
 
     struct ext2_fs *fs = kmalloc(sizeof(*fs));
     if (!fs)
+    {
+        render_printf("ext2: unable to create filesystem\n");
         return 0;
+    }
 
     fs->start_lba = start_lba;
     fs->block_size = 1024 << sb->s_log_block_size;

@@ -7,10 +7,12 @@ set -eu
 ROOTRUN=${ROOTRUN:-run0}
 
 KERNEL=build/uorix.elf
+SHELL=build/userland/shell.elf
 BOOTX64=${BOOTX64:-/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI}
 CODEFD=${CODEFD:-/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd}
 IMG=image/uorix.img
 MNT=/tmp/uorix-mnt
+RT=/tmp/uorix-root
 
 build() {
     echo "==> Building..."
@@ -30,7 +32,7 @@ build_scratch() {
 }
 
 replace() {
-    echo "==> Remaking image (single ESP)..."
+    echo "==> Replacing..."
 
     mkdir -p image
 
@@ -43,24 +45,30 @@ replace() {
         return 1
     fi
 
-    rm -f "$IMG"
-    dd if=/dev/zero of="$IMG" bs=1M count=64 status=none
+    # rm -f "$IMG"
+    # dd if=/dev/zero of="$IMG" bs=1M count=64 status=none
 
-    parted -s "$IMG" mklabel gpt
-    parted -s "$IMG" mkpart ESP fat32 1MiB 100%
-    parted -s "$IMG" set 1 esp on
+    # parted -s "$IMG" mklabel gpt
+    # parted -s "$IMG" mkpart ESP fat32 1MiB 100%
+    # parted -s "$IMG" set 1 esp on
 
     LOOP=$($ROOTRUN losetup --find --show --partscan "$IMG")
     sleep 0.5
 
     ESP="${LOOP}p1"
+    ROOT="${LOOP}p2"
+
     if [ ! -b "$ESP" ]; then
         echo "Error: $ESP did not appear" >&2
         $ROOTRUN losetup -d "$LOOP" || true
         return 1
     fi
 
-    $ROOTRUN mkfs.fat -F 32 -n UORIX "$ESP"
+    if [ ! -b "$ROOT" ]; then
+        echo "Error: $ROOT did not appear" >&2
+        $ROOTRUN losetup -d "$LOOP" || true
+        return 1
+    fi
 
     $ROOTRUN mkdir -p "$MNT"
     $ROOTRUN mount "$ESP" "$MNT"
@@ -68,6 +76,11 @@ replace() {
 
     $ROOTRUN cp "$BOOTX64" "$MNT/EFI/BOOT/BOOTX64.EFI"
     $ROOTRUN cp "$KERNEL"  "$MNT/boot/uorix.elf"
+
+    $ROOTRUN mount -o loop,offset=$((67584 * 512)) $IMG $RT
+
+    $ROOTRUN mkdir -p  $RT/bin
+    $ROOTRUN cp $SHELL $RT/bin/sh
 
     cat > /tmp/uorix-limine.conf << 'EOF'
 timeout: 1
@@ -79,17 +92,19 @@ EOF
     $ROOTRUN cp /tmp/uorix-limine.conf "$MNT/limine.conf"
 
     sync
+    $ROOTRUN umount $RT
     $ROOTRUN umount "$MNT"
     $ROOTRUN losetup -d "$LOOP"
     sync
 
-    echo "==> Image ready: $IMG (single ESP)"
+    echo "==> Image ready: $IMG"
 }
 
 start() {
     echo "==> Starting QEMU..."
+
     qemu-system-x86_64 \
-        -machine q35 \
+        -machine pc \
         -m 512M \
         -drive if=pflash,format=raw,readonly=on,file="$CODEFD" \
         -drive format=raw,file="$IMG" \
