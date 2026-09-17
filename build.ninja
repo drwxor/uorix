@@ -2,7 +2,6 @@ cc = clang
 ld = ld.lld
 
 cflags = -Iinclude -target x86_64-unknown-none -ffreestanding -fno-stack-protector -fno-pic -fno-pie -mno-red-zone -mno-sse -mno-sse2 -mcmodel=kernel -Wall -Wextra -O2
-
 ucflags = -Iinclude/libc -Iinclude/userland -target x86_64-unknown-none -ffreestanding -fno-builtin -fno-stack-protector -fno-pic -fno-pie -mno-red-zone -mno-sse -mno-sse2 -mcmodel=small -Wall -Wextra -O2
 
 rule cc
