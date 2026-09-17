@@ -29,12 +29,12 @@ isr_syscall:
     push %r14
     push %r15
 
-    mov 112(%rsp), %rdi     /* nr  */
-    mov  72(%rsp), %rsi     /* a1  */
-    mov  80(%rsp), %rdx     /* a2  */
-    mov  88(%rsp), %rcx     /* a3  */
-    mov  40(%rsp), %r8      /* a4  */
-    mov  56(%rsp), %r9      /* a5  */
+    mov 112(%rsp), %rdi
+    mov  72(%rsp), %rsi
+    mov  80(%rsp), %rdx
+    mov  88(%rsp), %rcx
+    mov  40(%rsp), %r8
+    mov  56(%rsp), %r9
 
     mov  %rsp, %rbp
     and  $~0xF, %rsp

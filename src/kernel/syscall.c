@@ -18,42 +18,42 @@ syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4,
 
     switch (nr)
     {
-    case SYS_READ:
-    {
-        char *buf = (char *)a1;
-        if (a2 < 1)
+        case SYS_READ:
+        {
+            char *buf = (char *)a1;
+            if (a2 < 1)
+                return 0;
+            buf[0] = keyboard_getc();
+            return 1;
+        }
+
+        case SYS_WRITE:
+        {
+            const char *buf = (const char *)a1;
+            uint64_t count = a2;
+            for (uint64_t i = 0; i < count; i++)
+                render_putc(buf[i]);
+            return count;
+        }
+
+        case SYS_CLEAR:
+            render_clear(0x00000000);
             return 0;
-        buf[0] = keyboard_getc();
-        return 1;
-    }
 
-    case SYS_WRITE:
-    {
-        const char *buf = (const char *)a1;
-        uint64_t count = a2;
-        for (uint64_t i = 0; i < count; i++)
-            render_putc(buf[i]);
-        return count;
-    }
+        case SYS_MEMINFO:
+            return pmm_free_pages();
 
-    case SYS_CLEAR:
-        render_clear(0x00000000);
-        return 0;
+        case SYS_BRK:
+            return elf_brk(a1);
 
-    case SYS_MEMINFO:
-        return pmm_free_pages();
+        case SYS_EXIT:
+            render_printf("\n[pid 1] exit %u\n", a1);
+            for (;;)
+                __asm__ volatile ("hlt");
+            return 0;
 
-    case SYS_BRK:
-        return elf_brk(a1);
-
-    case SYS_EXIT:
-        render_printf("\n[pid 1] exit %u\n", a1);
-        for (;;)
-            __asm__ volatile ("hlt");
-        return 0;
-
-    default:
-        return (uint64_t)-1;
+        default:
+            return (uint64_t)-1;
     }
 }
 

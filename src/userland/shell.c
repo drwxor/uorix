@@ -58,7 +58,8 @@ cmd_info(void)
 {
     printf("\n");
 
-    for (int i = 0; logo[i] != 0; i++) {
+    for (int i = 0; logo[i] != 0; i++)
+    {
         printf(logo[i]);
 
         if (i == 0)

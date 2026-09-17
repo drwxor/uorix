@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 struct block {
-    size_t        size;
+    size_t size;
     struct block *next;
 };
 
@@ -28,26 +28,35 @@ void
 freelist_add(struct block *b)
 {
     struct block *prev = 0;
-    struct block *cur  = free_list;
+    struct block *cur = free_list;
 
-    while (cur && cur < b) {
+    while (cur && cur < b)
+    {
         prev = cur;
-        cur  = cur->next;
+        cur = cur->next;
     }
 
-    if (cur && (uint8_t *)b + HEADER_SIZE + b->size == (uint8_t *)cur) {
+    if (cur && (uint8_t *)b + HEADER_SIZE + b->size == (uint8_t *)cur)
+    {
         b->size += HEADER_SIZE + cur->size;
-        b->next  = cur->next;
-    } else {
+        b->next = cur->next;
+    }
+    else
+    {
         b->next = cur;
     }
 
-    if (prev && (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b) {
+    if (prev && (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b)
+    {
         prev->size += HEADER_SIZE + b->size;
-        prev->next  = b->next;
-    } else if (prev) {
+        prev->next = b->next;
+    }
+    else if (prev)
+    {
         prev->next = b;
-    } else {
+    }
+    else
+    {
         free_list = b;
     }
 }
@@ -62,24 +71,29 @@ malloc(size_t size)
     if (size < MIN_PAYLOAD)
         size = MIN_PAYLOAD;
 
-    for (;;) {
+    for (;;)
+    {
         struct block *prev = 0;
-        struct block *cur  = free_list;
+        struct block *cur = free_list;
 
-        while (cur) {
-            if (cur->size >= size) {
-                if (cur->size >= size + HEADER_SIZE + MIN_PAYLOAD) {
-                    struct block *split =
-                        (struct block *)((uint8_t *)cur + HEADER_SIZE + size);
+        while (cur)
+        {
+            if (cur->size >= size)
+            {
+                if (cur->size >= size + HEADER_SIZE + MIN_PAYLOAD)
+                {
+                    struct block *split = (struct block *)((uint8_t *)cur + HEADER_SIZE + size);
                     split->size = cur->size - size - HEADER_SIZE;
                     split->next = cur->next;
-                    cur->size   = size;
-                    cur->next   = 0;
+                    cur->size = size;
+                    cur->next = 0;
                     if (prev)
                         prev->next = split;
                     else
                         free_list = split;
-                } else {
+                }
+                else
+                {
                     if (prev)
                         prev->next = cur->next;
                     else
@@ -121,13 +135,15 @@ realloc(void *ptr, size_t size)
 {
     if (ptr == 0)
         return malloc(size);
-    if (size == 0) {
+    if (size == 0)
+    {
         free(ptr);
         return 0;
     }
 
     struct block *b = (struct block *)((uint8_t *)ptr - HEADER_SIZE);
-    if (b->size >= size) {
+    if (b->size >= size)
+    {
         return ptr;
     }
 
@@ -166,11 +182,13 @@ atoi(const char *s)
 {
     int sign = 1;
     int n = 0;
-    if (*s == '-') {
+    if (*s == '-')
+    {
         sign = -1;
         s++;
     }
-    while (*s >= '0' && *s <= '9') {
+    while (*s >= '0' && *s <= '9')
+    {
         n = n * 10 + (*s - '0');
         s++;
     }
@@ -187,14 +205,18 @@ strtol(const char *nptr, char **endptr, int base)
     if (base == 0)
         base = 10;
 
-    if (*s == '-') {
+    if (*s == '-')
+    {
         sign = -1;
         s++;
-    } else if (*s == '+') {
+    }
+    else if (*s == '+')
+    {
         s++;
     }
 
-    while (*s) {
+    while (*s)
+    {
         int d;
         if (*s >= '0' && *s <= '9')
             d = *s - '0';

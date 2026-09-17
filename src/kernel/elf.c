@@ -31,7 +31,8 @@
 #define USER_LOAD_BASE 0x0000000000400000ULL
 #define USER_LIMIT 0x00007FFFFFFFF000ULL
 
-struct elf64_ehdr {
+struct elf64_ehdr
+{
     uint8_t  e_ident[16];
     uint16_t e_type;
     uint16_t e_machine;
@@ -48,7 +49,8 @@ struct elf64_ehdr {
     uint16_t e_shstrndx;
 };
 
-struct elf64_phdr {
+struct elf64_phdr
+{
     uint32_t p_type;
     uint32_t p_flags;
     uint64_t p_offset;
@@ -134,7 +136,8 @@ map_segment(uint64_t pml4_phys, const uint8_t *file, uint64_t file_size, const s
         if (copy_hi > file_end)
             copy_hi = file_end;
 
-        if (copy_hi > copy_lo) {
+        if (copy_hi > copy_lo)
+        {
             uint64_t file_off = ph->p_offset + (copy_lo - seg_start);
             kmemcpy(dst + (copy_lo - va), file + file_off, copy_hi - copy_lo);
         }
