@@ -100,16 +100,89 @@ static const char scancode_ascii[128] = {
     [0x39] = ' '
 };
 
+static const char scancode_shift[128] = {
+    [0x02] = '!',
+    [0x03] = '@',
+    [0x04] = '#',
+    [0x05] = '$',
+    [0x06] = '%',
+    [0x07] = '^',
+    [0x08] = '&',
+    [0x09] = '*',
+    [0x0A] = '(',
+    [0x0B] = ')',
+
+    [0x0C] = '_',
+    [0x0D] = '+',
+
+    [0x10] = 'Q',
+    [0x11] = 'W',
+    [0x12] = 'E',
+    [0x13] = 'R',
+    [0x14] = 'T',
+    [0x15] = 'Y',
+    [0x16] = 'U',
+    [0x17] = 'I',
+    [0x18] = 'O',
+    [0x19] = 'P',
+
+    [0x1A] = '{',
+    [0x1B] = '}',
+
+    [0x27] = ':',
+    [0x28] = '"',
+    [0x29] = '~',
+
+    [0x2B] = '|',
+
+    [0x2C] = 'Z',
+    [0x2D] = 'X',
+    [0x2E] = 'C',
+    [0x2F] = 'V',
+    [0x30] = 'B',
+    [0x31] = 'N',
+    [0x32] = 'M',
+
+    [0x33] = '<',
+    [0x34] = '>',
+    [0x35] = '?'
+};
+
 char
 keyboard_getc(void)
 {
-    for (;;) {
+    static int shift = 0;
+
+    for (;;)
+    {
         uint8_t scancode = keyboard_read_scancode();
+
+        if (scancode == 0x2A || scancode == 0x36)
+        {
+            shift = 1;
+            continue;
+        }
+
+        if (scancode == 0xAA || scancode == 0xB6)
+        {
+            shift = 0;
+            continue;
+        }
 
         if (scancode & 0x80)
             continue;
 
-        if (scancode < 128 && scancode_ascii[scancode] != 0)
-            return scancode_ascii[scancode];
+        if (scancode >= 128)
+            continue;
+
+        char c;
+
+        if (shift)
+            c = scancode_shift[scancode];
+        else
+            c = scancode_ascii[scancode];
+
+        if (c != 0)
+            return c;
     }
 }
