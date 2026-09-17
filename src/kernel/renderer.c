@@ -344,41 +344,41 @@ uint8_t
 
     switch (c)
     {
-    case ' ':
-        return glyph_space;
+        case ' ':
+            return glyph_space;
 
-    case '!':
-        return glyph_bang;
+        case '!':
+            return glyph_bang;
 
-    case '.':
-        return glyph_dot;
+        case '.':
+            return glyph_dot;
 
-    case '_':
-        return glyph_underscore;
+        case '_':
+            return glyph_underscore;
 
-    case '$':
-        return glyph_dollar;
+        case '$':
+            return glyph_dollar;
 
-    case ':':
-        return glyph_colon;
+        case ':':
+            return glyph_colon;
 
-    case '-':
-        return glyph_dash;
+        case '-':
+            return glyph_dash;
 
-    case '/':
-        return glyph_slash;
+        case '/':
+            return glyph_slash;
 
-    case '%':
-        return glyph_percent;
+        case '%':
+            return glyph_percent;
 
-    case '(':
-        return glyph_lparen;
+        case '(':
+            return glyph_lparen;
 
-    case ')':
-        return glyph_rparen;
+        case ')':
+            return glyph_rparen;
 
-    default:
-        return glyph_space;
+        default:
+            return glyph_space;
     }
 }
 
@@ -470,9 +470,7 @@ render_putc(char c)
             cursor_x -= font_width + font_spacing;
 
             for (uint64_t row = 0; row < font_height; row++) {
-                for (uint64_t col = 0;
-                     col < font_width + font_spacing;
-                     col++) {
+                for (uint64_t col = 0; col < font_width + font_spacing; col++) {
                     putpixel(
                         cursor_x + col,
                         cursor_y + row,
@@ -570,34 +568,34 @@ render_printf(const char *fmt, ...)
 
         switch (*fmt)
         {
-        case '%':
-            render_putc('%');
-            break;
+            case '%':
+                render_putc('%');
+                break;
 
-        case 'c':
-            render_putc((char)va_arg(args, int));
-            break;
+            case 'c':
+                render_putc((char)va_arg(args, int));
+                break;
 
-        case 's':
-            render_puts(va_arg(args, const char *));
-            break;
+            case 's':
+                render_puts(va_arg(args, const char *));
+                break;
 
-        case 'u':
-            render_uint(va_arg(args, uint64_t), 10);
-            break;
+            case 'u':
+                render_uint(va_arg(args, uint64_t), 10);
+                break;
 
-        case 'x':
-            render_uint(va_arg(args, uint64_t), 16);
-            break;
+            case 'x':
+                render_uint(va_arg(args, uint64_t), 16);
+                break;
 
-        case 'd':
-            render_int(va_arg(args, int64_t));
-            break;
+            case 'd':
+                render_int(va_arg(args, int64_t));
+                break;
 
-        default:
-            render_putc('%');
-            render_putc(*fmt);
-            break;
+            default:
+                render_putc('%');
+                render_putc(*fmt);
+                break;
         }
 
         fmt++;

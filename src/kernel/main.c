@@ -58,8 +58,7 @@ extern char init_elf_end[];
 
 static
 int
-try_load_elf(const void *data, uint64_t size, uint64_t pml4,
-             uint64_t *entry, uint64_t *brk)
+try_load_elf(const void *data, uint64_t size, uint64_t pml4, uint64_t *entry, uint64_t *brk)
 {
     return elf_load(data, size, pml4, entry, brk);
 }

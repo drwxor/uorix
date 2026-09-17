@@ -47,12 +47,14 @@
         0x63984e959a98244b \
     }
 
-struct limine_hhdm_response {
+struct limine_hhdm_response
+{
     uint64_t revision;
     uint64_t offset;
 };
 
-struct limine_hhdm_request {
+struct limine_hhdm_request
+{
     uint64_t id[4];
     uint64_t revision;
     LIMINE_PTR(struct limine_hhdm_response *) response;
@@ -67,7 +69,8 @@ struct limine_hhdm_request {
 
 #define LIMINE_FRAMEBUFFER_RGB 1
 
-struct limine_video_mode {
+struct limine_video_mode
+{
     uint64_t pitch;
     uint64_t width;
     uint64_t height;
@@ -85,7 +88,8 @@ struct limine_video_mode {
     uint8_t blue_mask_shift;
 };
 
-struct limine_framebuffer {
+struct limine_framebuffer
+{
     LIMINE_PTR(void *) address;
 
     uint64_t width;
@@ -113,13 +117,15 @@ struct limine_framebuffer {
     LIMINE_PTR(struct limine_video_mode **) modes;
 };
 
-struct limine_framebuffer_response {
+struct limine_framebuffer_response
+{
     uint64_t revision;
     uint64_t framebuffer_count;
     LIMINE_PTR(struct limine_framebuffer **) framebuffers;
 };
 
-struct limine_framebuffer_request {
+struct limine_framebuffer_request
+{
     uint64_t id[4];
     uint64_t revision;
     LIMINE_PTR(struct limine_framebuffer_response *) response;
@@ -134,28 +140,31 @@ struct limine_framebuffer_request {
         0xe304acdfc50c3c62 \
     }
 
-#define LIMINE_MEMMAP_USABLE                 0
-#define LIMINE_MEMMAP_RESERVED               1
-#define LIMINE_MEMMAP_ACPI_RECLAIMABLE       2
-#define LIMINE_MEMMAP_ACPI_NVS               3
-#define LIMINE_MEMMAP_BAD_MEMORY             4
+#define LIMINE_MEMMAP_USABLE 0
+#define LIMINE_MEMMAP_RESERVED 1
+#define LIMINE_MEMMAP_ACPI_RECLAIMABLE 2
+#define LIMINE_MEMMAP_ACPI_NVS 3
+#define LIMINE_MEMMAP_BAD_MEMORY 4
 #define LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE 5
-#define LIMINE_MEMMAP_KERNEL_AND_MODULES     6
-#define LIMINE_MEMMAP_FRAMEBUFFER            7
+#define LIMINE_MEMMAP_KERNEL_AND_MODULES 6
+#define LIMINE_MEMMAP_FRAMEBUFFER 7
 
-struct limine_memmap_entry {
+struct limine_memmap_entry
+{
     uint64_t base;
     uint64_t length;
     uint64_t type;
 };
 
-struct limine_memmap_response {
+struct limine_memmap_response
+{
     uint64_t revision;
     uint64_t entry_count;
     LIMINE_PTR(struct limine_memmap_entry **) entries;
 };
 
-struct limine_memmap_request {
+struct limine_memmap_request
+{
     uint64_t id[4];
     uint64_t revision;
     LIMINE_PTR(struct limine_memmap_response *) response;
@@ -170,7 +179,8 @@ struct limine_memmap_request {
         0xca1c4f3bd1280cee \
     }
 
-struct limine_file {
+struct limine_file
+{
     uint64_t revision;
     LIMINE_PTR(void *) address;
     uint64_t size;
@@ -178,13 +188,15 @@ struct limine_file {
     LIMINE_PTR(char *) cmdline;
 };
 
-struct limine_module_response {
+struct limine_module_response
+{
     uint64_t revision;
     uint64_t module_count;
     LIMINE_PTR(struct limine_file **) modules;
 };
 
-struct limine_module_request {
+struct limine_module_request
+{
     uint64_t id[4];
     uint64_t revision;
     LIMINE_PTR(struct limine_module_response *) response;

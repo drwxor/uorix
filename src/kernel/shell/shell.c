@@ -65,7 +65,8 @@ shell_execute(void)
         line[1] == 'c' &&
         line[2] == 'h' &&
         line[3] == 'o' &&
-        line[4] == ' ') {
+        line[4] == ' ')
+    {
         user_puts(line + 5);
         user_putc('\n');
         return;
@@ -78,7 +79,8 @@ shell_execute(void)
         line[3] == 'n' &&
         line[4] == 't' &&
         line[5] == 'f' &&
-        line[6] == ' ') {
+        line[6] == ' ')
+    {
         user_puts(line + 7);
         return;
     }

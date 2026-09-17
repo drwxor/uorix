@@ -8,7 +8,8 @@ ssize_t
 read(int fd, void *buf, size_t count)
 {
     (void)fd;
-    if (buf == 0) {
+    if (buf == 0)
+    {
         errno = EFAULT;
         return -1;
     }
@@ -19,7 +20,8 @@ ssize_t
 write(int fd, const void *buf, size_t count)
 {
     (void)fd;
-    if (buf == 0) {
+    if (buf == 0)
+    {
         errno = EFAULT;
         return -1;
     }
@@ -41,7 +43,8 @@ brk(void *addr)
         return 0;
 
     long ret = syscall1(SYS_BRK, (long)addr);
-    if (ret != (long)addr) {
+    if (ret != (long)addr)
+    {
         errno = ENOMEM;
         return -1;
     }
@@ -57,7 +60,8 @@ sbrk(intptr_t increment)
 
     long next = cur + increment;
     long ret  = syscall1(SYS_BRK, next);
-    if (ret != next) {
+    if (ret != next)
+    {
         errno = ENOMEM;
         return (void *)-1;
     }

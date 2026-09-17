@@ -50,8 +50,7 @@ freelist_add(struct block *b)
         b->next = cur;
     }
 
-    if (prev &&
-        (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b)
+    if (prev && (uint8_t *)prev + HEADER_SIZE + prev->size == (uint8_t *)b)
     {
         prev->size += HEADER_SIZE + b->size;
         prev->next = b->next;
