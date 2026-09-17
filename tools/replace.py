@@ -36,21 +36,15 @@ def replace():
     os.makedirs("image", exist_ok=True)
 
     if not os.path.isfile(kernel):
-        sys.stderr.write(
-            f"Error: {kernel} not found – run with -b first\n"
-        )
+        sys.stderr.write(f"Error: {kernel} not found – run with -b first\n")
         return 1
 
     if not os.path.isfile(shell):
-        sys.stderr.write(
-            f"Error: {shell} not found – run with -b first\n"
-        )
+        sys.stderr.write(f"Error: {shell} not found – run with -b first\n")
         return 1
 
     if not os.path.isfile(bootx64):
-        sys.stderr.write(
-            f"Error: {bootx64} not found\n"
-        )
+        sys.stderr.write(f"Error: {bootx64} not found\n")
         return 1
 
     loop = None
@@ -58,14 +52,7 @@ def replace():
     mounted_root = False
 
     try:
-        loop = run(
-            rootrun,
-            "losetup",
-            "--find",
-            "--show",
-            "--partscan",
-            img
-        )
+        loop = run(rootrun, "losetup", "--find", "--show", "--partscan", img)
 
         time.sleep(0.5)
 
@@ -83,39 +70,18 @@ def replace():
         run(rootrun, "mount", esp, mnt)
         mounted_esp = True
 
-        run(
-            rootrun,
-            "mkdir",
-            "-p",
-            f"{mnt}/EFI/BOOT",
-            f"{mnt}/boot"
-        )
+        run(rootrun, "mkdir", "-p", f"{mnt}/EFI/BOOT", f"{mnt}/boot")
 
-        run(
-            rootrun,
-            "cp",
-            bootx64,
-            f"{mnt}/EFI/BOOT/BOOTX64.EFI"
-        )
+        run(rootrun, "cp", bootx64, f"{mnt}/EFI/BOOT/BOOTX64.EFI")
 
-        run(
-            rootrun,
-            "cp",
-            kernel,
-            f"{mnt}/boot/uorix.elf"
-        )
+        run(rootrun, "cp", kernel, f"{mnt}/boot/uorix.elf")
 
         run(rootrun, "mount", root, rt)
         mounted_root = True
 
         run(rootrun, "mkdir", "-p", f"{rt}/bin")
 
-        run(
-            rootrun,
-            "cp",
-            shell,
-            f"{rt}/bin/sh"
-        )
+        run(rootrun, "cp", shell, f"{rt}/bin/sh")
 
         conf_path = "/tmp/uorix-limine.conf"
 
@@ -128,12 +94,7 @@ def replace():
                 "    path: boot():/boot/uorix.elf\n"
             )
 
-        run(
-            rootrun,
-            "cp",
-            conf_path,
-            f"{mnt}/limine.conf"
-        )
+        run(rootrun, "cp", conf_path, f"{mnt}/limine.conf")
 
         run("sync")
 
@@ -143,22 +104,13 @@ def replace():
 
     finally:
         if mounted_root:
-            subprocess.run(
-                [rootrun, "umount", rt],
-                check=False
-            )
+            subprocess.run([rootrun, "umount", rt], check=False)
 
         if mounted_esp:
-            subprocess.run(
-                [rootrun, "umount", mnt],
-                check=False
-            )
+            subprocess.run([rootrun, "umount", mnt], check=False)
 
         if loop:
-            subprocess.run(
-                [rootrun, "losetup", "-d", loop],
-                check=False
-            )
+            subprocess.run([rootrun, "losetup", "-d", loop], check=False)
 
         subprocess.run(["sync"], check=False)
 
