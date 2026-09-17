@@ -1,13 +1,9 @@
-#!/usr/bin/env python3
 import argparse
 import sys
 import subprocess
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Development helper for Uorix",
-        add_help=False
-    )
+    parser = argparse.ArgumentParser(description="Development helper for Uorix", add_help=False)
 
     parser.add_argument("-b", "--build", action="store_true")
     parser.add_argument("-r", "--replace", action="store_true")
