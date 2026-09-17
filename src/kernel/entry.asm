@@ -2,6 +2,7 @@
 
 section .text
 global _start
+extern kmain
 
 _start:
     lea rsp, [rel stack_top]

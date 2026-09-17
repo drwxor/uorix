@@ -9,6 +9,7 @@ isr_null:
     jmp isr_null
 
 global isr_syscall
+extern syscall_handler
 isr_syscall:
     push rax
     push rbx
