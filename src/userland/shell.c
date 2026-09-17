@@ -22,6 +22,7 @@ cmd_help(void)
     printf("\thelp     show this message\n");
     printf("\tclear    clear the screen\n");
     printf("\techo     print text\n");
+    printf("\tprintf   print text without making new line\n");
     printf("\tuname    show system name\n");
     printf("\tfetch    fetch current system status\n");
     printf("\tmem      show free physical pages\n");
@@ -127,6 +128,8 @@ main(void)
             }
             else if (strncmp(line, "echo ", 5) == 0)
                 printf("%s\n", line + 5);
+            else if (strncmp(line, "printf ", 5) == 0)
+                printf("%s", line + 7);
             else
                 printf("uorix: command not found: %s\n", line);
 
