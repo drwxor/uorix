@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import subprocess
 import sys
@@ -24,10 +22,7 @@ def replace():
     kernel = "build/uorix.elf"
     shell = "build/userland/shell.elf"
 
-    bootx64 = os.environ.get(
-        "BOOTX64",
-        "/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI"
-    )
+    bootx64 = os.environ.get("BOOTX64", "/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI")
 
     img = "image/uorix.img"
     mnt = "/tmp/uorix-mnt"
@@ -60,9 +55,7 @@ def replace():
         root = f"{loop}p2"
 
         if not Path(esp).is_block_device() or not Path(root).is_block_device():
-            raise RuntimeError(
-                "Loop partition devices did not appear properly"
-            )
+            raise RuntimeError("Loop partition devices did not appear properly")
 
         run(rootrun, "mkdir", "-p", mnt)
         run(rootrun, "mkdir", "-p", rt)
