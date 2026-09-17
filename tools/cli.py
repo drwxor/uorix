@@ -30,18 +30,15 @@ Options:
 
     if args.build:
         print("==> Calling build script...")
-        if subprocess.run([sys.executable, "tools/build.py"]).returncode != 0:
-            sys.exit(1)
+        subprocess.run([sys.executable, "tools/build.py"])
 
     if args.replace:
         print("==> Calling replace script...")
-        if subprocess.run([sys.executable, "tools/replace.py"]).returncode != 0:
-            sys.exit(1)
+        subprocess.run([sys.executable, "tools/replace.py"])
 
     if args.run:
         print("==> Calling run script...")
-        if subprocess.run([sys.executable, "tools/run.py"]).returncode != 0:
-            sys.exit(1)
+        subprocess.run([sys.executable, "tools/run.py"])
 
 if __name__ == "__main__":
     main()
