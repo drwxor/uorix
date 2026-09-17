@@ -46,6 +46,12 @@ static volatile struct limine_module_request module_request = {
 };
 
 __attribute__((used, section(".limine_requests")))
+static volatile struct limine_flanterm_fb_init_params_request flanterm_request = {
+    .id = LIMINE_FLANTERM_FB_INIT_PARAMS_REQUEST_ID,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
 static uint8_t kernel_stack[16384] __attribute__((aligned(16)));
@@ -76,10 +82,17 @@ kmain(void)
 
     struct limine_framebuffer *fb = fb_resp->framebuffers[0];
 
-    renderer_init(fb);
-    render_clear(0x00000000);
+    struct limine_flanterm_fb_init_params *font_params = 0;
 
-    render_printf("kernel ready\n");
+    if (flanterm_request.response != 0 &&
+        flanterm_request.response->entry_count > 0)
+    {
+        font_params = flanterm_request.response->entries[0];
+    }
+
+    renderer_init(fb, font_params);
+    render_clear(0x00000000);
+    render_printf("renderer ready\n");
     render_printf("framebuffer %ux%u ready\n", fb->width, fb->height);
 
     gdt_init();
@@ -98,7 +111,7 @@ kmain(void)
     if (memmap_request.response != 0)
         pmm_init(memmap_request.response, hhdm);
     else
-        render_printf("pmm: no memmap from limine\n");
+        render_printf("pmm: no memmap from limine!\n");
 
     heap_init();
     paging_allow_user_access();
@@ -107,7 +120,7 @@ kmain(void)
     uint64_t user_pml4 = paging_create_user_as(&user_stack_top);
     if (user_pml4 == 0)
     {
-        render_printf("unable to create user\n");
+        render_printf("unable to create user!\n");
         render_printf("falling back to kernel shell\n");
         static uint8_t fallback_stack[16384] __attribute__((aligned(16)));
         shell_init();
@@ -138,13 +151,13 @@ kmain(void)
             }
             else
             {
-                render_printf("ext2: /bin/sh not found or unreadable\n");
+                render_printf("ext2: /bin/sh not found or unreadable!\n");
             }
             ext2_unmount(fs);
         }
         else
         {
-            render_printf("ext2: unable to find a ext2 file system\n");
+            render_printf("ext2: unable to find a ext2 file system!\n");
         }
     }
 
@@ -164,7 +177,7 @@ kmain(void)
 
     if (loaded != 0)
     {
-        render_printf("elf: load failed, kernel shell\n");
+        render_printf("elf: load failed! using kernel shell\n");
         shell_init();
         user_enter((uint64_t)shell_run, user_stack_top);
         for (;;)
