@@ -147,6 +147,12 @@ render_putc(char c, uint32_t color)
         return;
     }
 
+    if (c == '\t')
+    {
+        cursor_x += 32;
+        return;
+    }
+
     if (c == '\b')
     {
         if (cursor_x >= 32 + font_width + font_spacing)
