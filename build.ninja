@@ -21,15 +21,15 @@ rule uld
     command = $ld -T src/userland/user.ld -o $out $in
     description = ULD $out
 
-rule asm
-    command = clang -target x86_64-unknown-none -ffreestanding -c $in -o $out
-    description = AS $in
+rule nasm
+    command = nasm -f elf64 -g -F dwarf $in -o $out
+    description = NASM $in
 
 # kernel
 
-build build/object/entry.o: asm src/kernel/entry.S
-build build/object/isr.o: asm src/kernel/isr.S
-build build/object/user_entry.o: asm src/kernel/user_entry.S
+build build/object/entry.o: nasm src/kernel/entry.S
+build build/object/isr.o: nasm src/kernel/isr.S
+build build/object/user_entry.o: nasm src/kernel/user_entry.S
 build build/object/main.o: cc src/kernel/main.c
 build build/object/renderer.o: cc src/kernel/renderer.c
 build build/object/driver/keyboard.o: cc src/kernel/driver/keyboard.c
@@ -47,7 +47,7 @@ build build/object/shell.o: cc src/kernel/shell/shell.c
 
 # libc
 
-build build/object/libc/crt0.o: asm src/libc/crt0.S
+build build/object/libc/crt0.o: nasm src/libc/crt0.S
 build build/object/libc/syscall.o: ucc src/libc/syscall.c
 build build/object/libc/errno.o: ucc src/libc/errno.c
 build build/object/libc/unistd.o: ucc src/libc/unistd.c
@@ -91,7 +91,7 @@ build build/userland/hello.elf: uld $
     build/object/libc/stdio.o $
     build/object/userland/hello.o
 
-build build/object/init/elf.o: asm src/kernel/init_elf.S || build/userland/init.elf
+build build/object/init/elf.o: nasm src/kernel/init_elf.S || build/userland/init.elf
 
 build build/uorix.elf: ld $
     build/object/entry.o $
