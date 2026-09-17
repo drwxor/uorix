@@ -92,21 +92,22 @@ kmain(void)
 
     renderer_init(fb, font_params);
     render_clear(0x00000000);
-    render_printf("renderer ready\n");
-    render_printf("framebuffer %ux%u ready\n", fb->width, fb->height);
+
+    render_printf("renderer "); render_printf_colored("[OK]\n", GREEN_COLOR);
 
     gdt_init();
-    render_printf("gdt ready\n");
+    render_printf("gdt "); render_printf_colored("[OK]\n", GREEN_COLOR);
     tss_set_rsp0(KERNEL_STACK_TOP);
-    render_printf("tss ready\n");
+    render_printf("tss "); render_printf_colored("[OK]\n", GREEN_COLOR);
     idt_init();
-    render_printf("idt ready\n");
+    render_printf("idt "); render_printf_colored("[OK]\n", GREEN_COLOR);
 
     uint64_t hhdm = 0;
     if (hhdm_request.response != 0)
         hhdm = hhdm_request.response->offset;
 
     paging_init(hhdm);
+    render_printf("paging "); render_printf_colored("[OK]\n", GREEN_COLOR);
 
     if (memmap_request.response != 0)
         pmm_init(memmap_request.response, hhdm);
@@ -138,21 +139,24 @@ kmain(void)
 
     if (ata_init() == 0)
     {
-        const uint32_t EXT2_START_LBA = 67584;
         struct ext2_fs *fs = ext2_mount(EXT2_START_LBA);
         if (fs)
         {
+            rootfs = fs;
+
             void *file_buf = 0;
-            uint64_t file_size = ext2_read_file(fs, "/bin/sh", &file_buf);
+            uint64_t file_size = ext2_read_file(fs, "/bin/init", &file_buf);
+
             if (file_size != (uint64_t)-1 && file_buf)
             {
-                render_printf("elf: loading /bin/sh from ext2 (%u bytes)\n", (uint32_t)file_size);
+                render_printf("elf: loading /bin/init from ext2 (%u bytes)\n", (uint32_t)file_size);
                 loaded = try_load_elf(file_buf, file_size, user_pml4, &entry, &brk);
             }
             else
             {
-                render_printf("ext2: /bin/sh not found or unreadable!\n");
+                render_printf("ext2: /bin/init not found or unreadable!\n");
             }
+
             ext2_unmount(fs);
         }
         else

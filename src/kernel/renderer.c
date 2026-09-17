@@ -60,7 +60,7 @@ putpixel(uint64_t x, uint64_t y, uint32_t color)
 }
 
 static void
-draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
+draw_glyph(const uint8_t *g, uint64_t x, uint64_t y, uint32_t color)
 {
     if (g == 0)
         return;
@@ -75,7 +75,7 @@ draw_glyph(const uint8_t *g, uint64_t x, uint64_t y)
         for (uint64_t col = 0; col < width; col++)
         {
             if (g[row] & (1u << (7 - col)))
-                putpixel(x + col, y + row, foreground);
+                putpixel(x + col, y + row, color);
         }
     }
 }
@@ -127,7 +127,7 @@ render_clear(uint32_t color)
 }
 
 void
-render_putc(char c)
+render_putc(char c, uint32_t color)
 {
     serial_putc(c);
 
@@ -171,7 +171,7 @@ render_putc(char c)
         return;
     }
 
-    draw_glyph(glyph(c), cursor_x, cursor_y);
+    draw_glyph(glyph(c), cursor_x, cursor_y, color);
 
     cursor_x += font_width + font_spacing;
 
@@ -186,24 +186,24 @@ render_putc(char c)
 }
 
 void
-render_puts(const char *s)
+render_puts(const char *s, uint32_t color)
 {
     if (s == 0)
         return;
 
     while (*s)
-        render_putc(*s++);
+        render_putc(*s++, color);
 }
 
 static void
-render_uint(uint64_t value, uint32_t base)
+render_uint(uint64_t value, uint32_t base, uint32_t color)
 {
     char buffer[32];
     uint32_t length = 0;
 
     if (value == 0)
     {
-        render_putc('0');
+        render_putc('0', color);
         return;
     }
 
@@ -220,20 +220,20 @@ render_uint(uint64_t value, uint32_t base)
     }
 
     while (length != 0)
-        render_putc(buffer[--length]);
+        render_putc(buffer[--length], color);
 }
 
 static void
-render_int(int64_t value)
+render_int(int64_t value, uint32_t color)
 {
     if (value < 0)
     {
-        render_putc('-');
-        render_uint((uint64_t)(-value), 10);
+        render_putc('-', color);
+        render_uint((uint64_t)(-value), 10, color);
     }
     else
     {
-        render_uint((uint64_t)value, 10);
+        render_uint((uint64_t)value, 10, color);
     }
 }
 
@@ -248,7 +248,7 @@ render_printf(const char *fmt, ...)
     {
         if (*fmt != '%')
         {
-            render_putc(*fmt);
+            render_putc(*fmt, WHITE_COLOR);
             fmt++;
             continue;
         }
@@ -258,32 +258,88 @@ render_printf(const char *fmt, ...)
         switch (*fmt)
         {
             case '%':
-                render_putc('%');
+                render_putc('%', WHITE_COLOR);
                 break;
 
             case 'c':
-                render_putc((char)va_arg(args, int));
+                render_putc((char)va_arg(args, int), WHITE_COLOR);
                 break;
 
             case 's':
-                render_puts(va_arg(args, const char *));
+                render_puts(va_arg(args, const char *), WHITE_COLOR);
                 break;
 
             case 'u':
-                render_uint(va_arg(args, uint64_t), 10);
+                render_uint(va_arg(args, uint64_t), 10, WHITE_COLOR);
                 break;
 
             case 'x':
-                render_uint(va_arg(args, uint64_t), 16);
+                render_uint(va_arg(args, uint64_t), 16, WHITE_COLOR);
                 break;
 
             case 'd':
-                render_int(va_arg(args, int64_t));
+                render_int(va_arg(args, int64_t), WHITE_COLOR);
                 break;
 
             default:
-                render_putc('%');
-                render_putc(*fmt);
+                render_putc('%', WHITE_COLOR);
+                render_putc(*fmt, WHITE_COLOR);
+                break;
+        }
+
+        fmt++;
+    }
+
+    va_end(args);
+}
+
+void
+render_printf_colored(const char *fmt, uint32_t color, ...)
+{
+    va_list args;
+
+    va_start(args, color);
+
+    while (*fmt != '\0')
+    {
+        if (*fmt != '%')
+        {
+            render_putc(*fmt, color);
+            fmt++;
+            continue;
+        }
+
+        fmt++;
+
+        switch (*fmt)
+        {
+            case '%':
+                render_putc('%', color);
+                break;
+
+            case 'c':
+                render_putc((char)va_arg(args, int), color);
+                break;
+
+            case 's':
+                render_puts(va_arg(args, const char *), color);
+                break;
+
+            case 'u':
+                render_uint(va_arg(args, uint64_t), 10, color);
+                break;
+
+            case 'x':
+                render_uint(va_arg(args, uint64_t), 16, color);
+                break;
+
+            case 'd':
+                render_int(va_arg(args, int64_t), color);
+                break;
+
+            default:
+                render_putc('%', color);
+                render_putc(*fmt, color);
                 break;
         }
 
