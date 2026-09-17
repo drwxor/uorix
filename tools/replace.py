@@ -20,6 +20,7 @@ def replace():
     rootrun = os.environ.get("RUN_AS_ROOT", "run0")
 
     kernel = "build/uorix.elf"
+    init = "build/userland/init.elf"
     shell = "build/userland/shell.elf"
 
     bootx64 = os.environ.get("BOOTX64", "/nix/store/kpgkpqpz1vjgzm5askic2pv0y7p4ssb0-limine-12.7.0/share/limine/BOOTX64.EFI")
@@ -32,6 +33,10 @@ def replace():
 
     if not os.path.isfile(kernel):
         sys.stderr.write(f"Error: {kernel} not found – run with -b first\n")
+        return 1
+
+    if not os.path.isfile(init):
+        sys.stderr.write(f"Error: {init} not found – run with -b first\n")
         return 1
 
     if not os.path.isfile(shell):
@@ -75,6 +80,7 @@ def replace():
         run(rootrun, "mkdir", "-p", f"{rt}/bin")
 
         run(rootrun, "cp", shell, f"{rt}/bin/sh")
+        run(rootrun, "cp", init, f"{rt}/bin/init")
 
         conf_path = "/tmp/uorix-limine.conf"
 

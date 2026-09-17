@@ -82,53 +82,62 @@ vsnprintf(char *out, size_t n, const char *fmt, va_list ap)
     int len = 0;
     (void)n;
 
-    while (*fmt && len < (int)sizeof(tmp) - 1) {
-        if (*fmt != '%') {
+    while (*fmt && len < (int)sizeof(tmp) - 1)
+    {
+        if (*fmt != '%')
+        {
             tmp[len++] = *fmt++;
             continue;
         }
         fmt++;
-        switch (*fmt) {
-        case '%':
-            tmp[len++] = '%';
-            break;
-        case 'c':
-            tmp[len++] = (char)va_arg(ap, int);
-            break;
-        case 's': {
-            const char *s = va_arg(ap, const char *);
-            if (!s)
-                s = "(null)";
-            while (*s && len < (int)sizeof(tmp) - 1)
-                tmp[len++] = *s++;
-            break;
-        }
-        case 'd': {
-            long v = va_arg(ap, int);
-            if (v < 0) {
-                tmp[len++] = '-';
-                fmt_uint(tmp, &len, (unsigned long)(-v), 10);
-            } else {
-                fmt_uint(tmp, &len, (unsigned long)v, 10);
+        switch (*fmt)
+        {
+            case '%':
+                tmp[len++] = '%';
+                break;
+            case 'c':
+                tmp[len++] = (char)va_arg(ap, int);
+                break;
+            case 's':
+            {
+                const char *s = va_arg(ap, const char *);
+                if (!s)
+                    s = "(null)";
+                while (*s && len < (int)sizeof(tmp) - 1)
+                    tmp[len++] = *s++;
+                break;
             }
-            break;
-        }
-        case 'u':
-            fmt_uint(tmp, &len, va_arg(ap, unsigned int), 10);
-            break;
-        case 'x':
-            fmt_uint(tmp, &len, va_arg(ap, unsigned int), 16);
-            break;
-        case 'p': {
-            tmp[len++] = '0';
-            tmp[len++] = 'x';
-            fmt_uint(tmp, &len, (unsigned long)va_arg(ap, void *), 16);
-            break;
-        }
-        default:
-            tmp[len++] = '%';
-            tmp[len++] = *fmt;
-            break;
+            case 'd':
+            {
+                long v = va_arg(ap, int);
+                if (v < 0)
+                {
+                    tmp[len++] = '-';
+                    fmt_uint(tmp, &len, (unsigned long)(-v), 10);
+                }
+                else
+                {
+                    fmt_uint(tmp, &len, (unsigned long)v, 10);
+                }
+                break;
+            }
+            case 'u':
+                fmt_uint(tmp, &len, va_arg(ap, unsigned int), 10);
+                break;
+            case 'x':
+                fmt_uint(tmp, &len, va_arg(ap, unsigned int), 16);
+                break;
+            case 'p':
+            {
+                tmp[len++] = '0';
+                tmp[len++] = 'x';
+                fmt_uint(tmp, &len, (unsigned long)va_arg(ap, void *), 16);
+                break;
+            }
+            default:
+                tmp[len++] = '%';
+                tmp[len++] = *fmt;
+                break;
         }
         if (*fmt)
             fmt++;
@@ -166,11 +175,33 @@ vprintf(const char *fmt, va_list ap)
 }
 
 int
+vprintf_colored(const char *fmt, uint32_t color, va_list ap)
+{
+    char buf[256];
+    int n = vsnprintf(buf, sizeof(buf), fmt, ap);
+    if (n < 0)
+        return n;
+    size_t w = (size_t)n < sizeof(buf) ? (size_t)n : sizeof(buf) - 1;
+    write_colored(STDOUT_FILENO, buf, w, color);
+    return n;
+}
+
+int
 printf(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
     int r = vprintf(fmt, ap);
+    va_end(ap);
+    return r;
+}
+
+int
+printf_colored(const char *fmt, uint32_t color, ...)
+{
+    va_list ap;
+    va_start(ap, color);
+    int r = vprintf_colored(fmt, color, ap);
     va_end(ap);
     return r;
 }

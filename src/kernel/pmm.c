@@ -179,7 +179,7 @@ pmm_init(struct limine_memmap_response *memmap, uint64_t hhdm)
             free_count--;
     }
 
-    render_printf("pmm: %u pages free / %u total\n", (uint32_t)free_count, (uint32_t)bitmap_pages);
+    render_printf("pmm "); render_printf_colored("[OK]\n", GREEN_COLOR);
 }
 
 uint64_t

@@ -94,9 +94,13 @@ heap_init(void)
     heap_ready = 1;
 
     if (heap_expand(PAGE_SIZE * 4) != 0)
-        render_printf("heap: expand failed\n");
+    {
+        render_printf("heap "); render_printf_colored("[EXPAND FAILED]\n", RED_COLOR);
+    }
     else
-        render_printf("heap ready\n");
+    {
+        render_printf("heap "); render_printf_colored("[OK]\n", GREEN_COLOR);
+    }
 }
 
 void

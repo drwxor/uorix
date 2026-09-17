@@ -7,7 +7,10 @@
 #define SYS_WRITE 1
 #define SYS_CLEAR 2
 #define SYS_MEMINFO 3
+
 #define SYS_BRK 12
+
+#define SYS_EXEC 59
 #define SYS_EXIT 60
 
 long syscall0(long n);

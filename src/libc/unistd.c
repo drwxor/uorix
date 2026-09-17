@@ -25,7 +25,32 @@ write(int fd, const void *buf, size_t count)
         errno = EFAULT;
         return -1;
     }
-    return (ssize_t)syscall2(SYS_WRITE, (long)buf, (long)count);
+    return (ssize_t)syscall3(SYS_WRITE, (long)buf, (long)count, 0x00FFFFFFu);
+}
+
+ssize_t
+write_colored(int fd, const void *buf, size_t count, uint32_t color)
+{
+    (void)fd;
+    if (buf == 0)
+    {
+        errno = EFAULT;
+        return -1;
+    }
+    return (ssize_t)syscall3(SYS_WRITE, (long)buf, (long)count, color);
+}
+
+int
+exec(const char *path)
+{
+    long ret = syscall1(SYS_EXEC, (long)path);
+    if (ret < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return 0;
 }
 
 void
