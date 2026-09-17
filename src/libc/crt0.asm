@@ -4,6 +4,7 @@ section .note.GNU-stack noalloc noexec nowrite progbits
 
 section .text
 global _start
+extern main
 
 _start:
     xor rbp, rbp

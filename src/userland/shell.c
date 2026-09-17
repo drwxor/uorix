@@ -23,7 +23,7 @@ cmd_help(void)
     printf("\tclear    clear the screen\n");
     printf("\techo     print text\n");
     printf("\tuname    show system name\n");
-    printf("\tinfo     show system info\n");
+    printf("\tfetch    fetch current system status\n");
     printf("\tmem      show free physical pages\n");
     printf("\tmalloc   exercise libc malloc\n");
     printf("\texit     leave the shell\n");
@@ -54,7 +54,7 @@ cmd_malloc(void)
 
 static
 void
-cmd_info(void)
+cmd_fetch(void)
 {
     printf("\n");
 
@@ -118,8 +118,8 @@ main(void)
                 cmd_mem();
             else if (strcmp(line, "malloc") == 0)
                 cmd_malloc();
-            else if (strcmp(line, "info") == 0)
-                cmd_info();
+            else if (strcmp(line, "fetch") == 0)
+                cmd_fetch();
             else if (strcmp(line, "exit") == 0)
             {
                 printf("bye\n");
