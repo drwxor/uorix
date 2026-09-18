@@ -3,7 +3,7 @@ import sys
 
 def build():
     print("==> Building...")
-    result = subprocess.run(["samu"], capture_output=True, text=True)
+    result = subprocess.run(["mold"], capture_output=True, text=True)
 
     if result.returncode != 0:
         sys.stderr.write(result.stdout)
