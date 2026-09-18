@@ -1,0 +1,106 @@
+# tools
+tool cc = clang;
+tool ld = ld.lld;
+
+# flags
+flags cflags = [
+    -Iinclude,
+    -target, x86_64-unknown-none,
+    -ffreestanding,
+    -fno-stack-protector,
+    -fno-pic,
+    -fno-pie,
+    -mno-red-zone,
+    -mno-sse,
+    -mno-sse2,
+    -mcmodel=kernel,
+    -Wall,
+    -Wextra,
+    -O2
+];
+
+flags ucflags = [
+    -Iinclude/libc,
+    -Iinclude/userland,
+    -target, x86_64-unknown-none,
+    -ffreestanding,
+    -fno-builtin,
+    -fno-stack-protector,
+    -fno-pic,
+    -fno-pie,
+    -mno-red-zone,
+    -mno-sse,
+    -mno-sse2,
+    -mcmodel=small,
+    -Wall,
+    -Wextra,
+    -O2
+];
+
+# instructions
+instruction cc {
+    command: "$(cc) $(cflags) -c $in -o $out";
+    description: "CC $in";
+}
+instruction ucc {
+    command: "$(cc) $(ucflags) -c $in -o $out";
+    description: "UCC $in";
+}
+instruction ld {
+    command: "$(ld) -T linker.ld -o $out $in";
+    description: "LD $out";
+}
+instruction uld {
+    command: "$(ld) -T src/userland/user.ld -o $out $in";
+    description: "ULD $out";
+}
+instruction nasm {
+    command: "nasm -f elf64 -g -F dwarf $in -o $out";
+    description: "NASM $in";
+}
+
+# kernel
+compile nasm src/kernel/entry.asm > build/object/entry.o;
+compile nasm src/kernel/isr.asm > build/object/isr.o;
+compile nasm src/kernel/user_entry.asm > build/object/user_entry.o;
+compile cc src/kernel/main.c > build/object/main.o;
+compile cc src/kernel/renderer.c > build/object/renderer.o;
+compile cc src/kernel/driver/keyboard.c > build/object/driver/keyboard.o;
+compile cc src/kernel/gdt.c > build/object/gdt.o;
+compile cc src/kernel/idt.c > build/object/idt.o;
+compile cc src/kernel/syscall.c > build/object/syscall.o;
+compile cc src/kernel/paging.c > build/object/paging.o;
+compile cc src/kernel/pmm.c > build/object/pmm.o;
+compile cc src/kernel/heap.c > build/object/heap.o;
+compile cc src/kernel/elf.c > build/object/elf.o;
+compile cc src/kernel/ata.c > build/object/ata.o;
+compile cc src/kernel/fs/ext2.c > build/object/fs/ext2.o;
+compile cc src/kernel/user/user.c > build/object/user.o;
+compile cc src/kernel/shell/shell.c > build/object/shell.o;
+
+# libc
+compile nasm src/libc/crt0.asm > build/object/libc/crt0.o;
+compile ucc src/libc/syscall.c > build/object/libc/syscall.o;
+compile ucc src/libc/errno.c > build/object/libc/errno.o;
+compile ucc src/libc/unistd.c > build/object/libc/unistd.o;
+compile ucc src/libc/string.c > build/object/libc/string.o;
+compile ucc src/libc/stdlib.c > build/object/libc/stdlib.o;
+compile ucc src/libc/stdio.c > build/object/libc/stdio.o;
+
+# userland objects
+compile ucc src/userland/init.c > build/object/userland/init.o;
+compile ucc src/userland/hello.c > build/object/userland/hello.o;
+compile ucc src/userland/shell.c > build/object/userland/shell.o;
+
+# userland ELFs
+compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/init.o > build/userland/init.elf;
+compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/shell.o > build/userland/shell.elf;
+compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/hello.o > build/userland/hello.elf;
+
+# kernel init_elf.o with an ORDER-ONLY dependency on init.elf
+compile nasm src/kernel/init_elf.asm @ build/userland/init.elf > build/object/init/elf.o;
+
+# final kernel image
+compile ld build/object/entry.o build/object/isr.o build/object/user_entry.o build/object/main.o build/object/renderer.o build/object/driver/keyboard.o build/object/gdt.o build/object/idt.o build/object/syscall.o build/object/paging.o build/object/pmm.o build/object/heap.o build/object/elf.o build/object/ata.o build/object/fs/ext2.o build/object/init/elf.o build/object/user.o build/object/shell.o > build/uorix.elf;
+
+default build/uorix.elf build/userland/shell.elf build/userland/hello.elf;
