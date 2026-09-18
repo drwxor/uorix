@@ -1,5 +1,4 @@
-*.ninja_deps
-*.ninja_log
+*.mold_log
 build
 *.o
 image
