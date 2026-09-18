@@ -24,12 +24,12 @@ The shell currently runs in the kernel.
 
 ## Building
 
-Uorix uses [samu](https://github.com/michaelforney/samurai) with Ninja build files.
+Uorix uses [mold](https://github.com/drwxor/mold).
 
 Build the kernel with:
 
 ```sh
-samu
+mold
 ```
 
 The resulting kernel is:
@@ -66,7 +66,7 @@ Current development uses:
 
 * Clang
 * LLD
-* samurai
+* mold 
 * QEMU
 * OVMF
 * Limine
