@@ -52,7 +52,8 @@ def replace():
     mounted_root = False
 
     try:
-        loop = run(rootrun, "losetup", "--find", "--show", "--partscan", img)
+        loop = run(rootrun, "losetup", "-f")
+        run(rootrun, "losetup", "-P", loop, img)
 
         time.sleep(0.5)
 

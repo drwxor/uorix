@@ -99,7 +99,7 @@ shell_init(void)
 void
 shell_run(void)
 {
-    user_puts("$ ");
+    user_puts("# ");
 
     for (;;)
     {
@@ -110,7 +110,7 @@ shell_run(void)
             user_putc('\n');
             shell_execute();
             line_clear();
-            user_puts("$ ");
+            user_puts("# ");
             continue;
         }
 

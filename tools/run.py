@@ -4,7 +4,7 @@ import sys
 
 def start():
     print("==> Starting QEMU...")
-    codefd = os.environ.get("CODEFD", "/nix/store/s2nn8543ykh79cfdi7l3m49snkv64lq3-OVMF-202608-fd/FV/OVMF_CODE.fd")
+    codefd = os.environ.get("CODEFD", "/usr/share/OVMF/OVMF_CODE.fd")
     img = os.environ.get("IMG", "image/uorix.img")
 
     cmd = [
