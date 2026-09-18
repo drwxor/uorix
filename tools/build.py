@@ -3,12 +3,9 @@ import sys
 
 def build():
     print("==> Building...")
-    result = subprocess.run(["mold"], capture_output=True, text=True)
+    result = subprocess.run(["mold"])
 
-    if result.returncode != 0:
-        sys.stderr.write(result.stdout)
-        return 1
-    return 0
+    return result.returncode;
 
 if __name__ == "__main__":
     sys.exit(build())
