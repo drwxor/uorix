@@ -1,6 +1,22 @@
 import argparse
 import sys
 import subprocess
+import shutil
+import subprocess
+
+def using_busybox():
+    busybox = shutil.which("busybox")
+
+    if not busybox:
+        return False
+
+    result = subprocess.run(
+        [busybox, "--help"],
+        capture_output=True,
+        text=True,
+    )
+
+    return result.returncode == 0
 
 def main():
     parser = argparse.ArgumentParser(description="Development helper for Uorix", add_help=False)
@@ -30,7 +46,7 @@ Options:
 
     if args.replace:
         print("==> Calling replace script...")
-        subprocess.run([sys.executable, "tools/replace.py"])
+        subprocess.run([sys.executable, "tools/replace_busybox.py" if using_busybox() else "tools/replace.py"])
 
     if args.run:
         print("==> Calling run script...")
