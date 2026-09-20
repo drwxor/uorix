@@ -11,27 +11,23 @@ SECTIONS
 {
     . = 0xffffffff80000000;
 
-    .text : ALIGN(4K)
+    .text :
     {
         *(.text*)
     } :text
 
-    . = ALIGN(4K);
-
-    .rodata : ALIGN(4K)
+    .rodata :
     {
         *(.rodata*)
         *(.limine_requests*)
     } :rodata
 
-    . = ALIGN(4K);
-
-    .data : ALIGN(4K)
+    .data :
     {
         *(.data*)
     } :data
 
-    .bss : ALIGN(4K)
+    .bss :
     {
         *(COMMON)
         *(.bss*)

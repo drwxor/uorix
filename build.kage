@@ -1,6 +1,6 @@
 # tools
 tool cc = clang;
-tool ld = ld.lld;
+tool ld = wild;
 tool uld = mold;
 
 # flags
