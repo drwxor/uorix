@@ -64,8 +64,8 @@ This is intentional for the current stage of development. More advanced process 
 
 Current development uses:
 
-* Clang
-* LLD
+* clang
+* wild
 * mold 
 * kage 
 * QEMU
