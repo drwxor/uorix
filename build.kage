@@ -1,6 +1,7 @@
 # tools
 tool cc = clang;
 tool ld = ld.lld;
+tool uld = mold;
 
 # flags
 flags cflags = [
@@ -51,7 +52,7 @@ instruction ld {
     description: "LD $out";
 }
 instruction uld {
-    command: "$(ld) -T src/userland/user.ld -o $out $in";
+    command: "$(uld) --static --no-build-id -e _start -o $out $in";
     description: "ULD $out";
 }
 instruction nasm {

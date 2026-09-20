@@ -1,4 +1,4 @@
-*.mold_log
+*.kage_log
 build
 *.o
 image
