@@ -67,6 +67,7 @@ Current development uses:
 * Clang
 * LLD
 * mold 
+* kage 
 * QEMU
 * OVMF
 * Limine
