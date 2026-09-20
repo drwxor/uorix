@@ -3,15 +3,16 @@
 #ifndef _SYS_SYSCALL_H
 #define _SYS_SYSCALL_H
 
-#define SYS_READ 0
-#define SYS_WRITE 1
-#define SYS_CLEAR 2
+#define SYS_READ    0
+#define SYS_WRITE   1
+#define SYS_CLEAR   2
 #define SYS_MEMINFO 3
-
-#define SYS_BRK 12
-
-#define SYS_EXEC 59
-#define SYS_EXIT 60
+#define SYS_BRK     12
+#define SYS_GETPID  39
+#define SYS_SPAWN   57
+#define SYS_EXEC    59
+#define SYS_EXIT    60
+#define SYS_WAIT    61
 
 long syscall0(long n);
 long syscall1(long n, long a1);

@@ -4,6 +4,7 @@
 #include "kernel/paging.h"
 #include "kernel/pmm.h"
 #include "kernel/renderer.h"
+#include "kernel/process.h"
 
 #include <stdint.h>
 
@@ -60,10 +61,6 @@ struct elf64_phdr
     uint64_t p_memsz;
     uint64_t p_align;
 };
-
-static uint64_t current_brk;
-static uint64_t current_brk_start;
-static uint64_t current_pml4;
 
 static
 void
@@ -235,41 +232,67 @@ elf_load(const void *data, uint64_t size, uint64_t pml4_phys,
 }
 
 void
-elf_brk_init(uint64_t start, uint64_t pml4_phys)
+elf_brk_init(uint64_t start)
 {
-    current_brk       = start;
-    current_brk_start = start;
-    current_pml4      = pml4_phys;
+    struct process *p = process_current();
+
+    p->brk = start;
+    p->brk_start = start;
 }
 
 uint64_t
 elf_brk(uint64_t addr)
 {
+    struct process *p = process_current();
+
+    if (!p)
+        return 0;
+
     if (addr == 0)
-        return current_brk;
+        return p->brk;
 
-    if (addr < current_brk_start)
-        return current_brk;
+    if (addr < p->brk_start)
+        return p->brk;
 
-    if (addr >= USER_STACK_VIRT - USER_STACK_PAGES * PAGE_SIZE)
-        return current_brk;
+    if (addr >= USER_STACK_VIRT -
+        USER_STACK_PAGES * PAGE_SIZE)
+        return p->brk;
 
-    if (addr > current_brk) {
-        uint64_t from = (current_brk + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-        uint64_t to   = (addr + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+    if (addr > p->brk)
+    {
+        uint64_t from =
+        (p->brk + PAGE_SIZE - 1) &
+        ~(PAGE_SIZE - 1);
 
-        for (uint64_t va = from; va < to; va += PAGE_SIZE) {
+        uint64_t to =
+        (addr + PAGE_SIZE - 1) &
+        ~(PAGE_SIZE - 1);
+
+        for (uint64_t va = from; va < to; va += PAGE_SIZE)
+        {
             uint64_t phys = pmm_alloc_page();
+
             if (phys == 0)
-                return current_brk;
-            uint8_t *p = (uint8_t *)paging_phys_to_virt(phys);
-            kmemset(p, 0, PAGE_SIZE);
-            if (paging_map_page_in(current_pml4, va, phys,
-                                   PTE_PRESENT | PTE_WRITE | PTE_USER) != 0)
-                return current_brk;
+                return p->brk;
+
+            uint8_t *mem =
+            (uint8_t *)paging_phys_to_virt(phys);
+
+            kmemset(mem, 0, PAGE_SIZE);
+
+            if (paging_map_page_in(
+                p->pml4,
+                va,
+                phys,
+                PTE_PRESENT |
+                PTE_WRITE |
+                PTE_USER) != 0)
+            {
+                return p->brk;
+            }
         }
     }
 
-    current_brk = addr;
-    return current_brk;
+    p->brk = addr;
+    return p->brk;
 }

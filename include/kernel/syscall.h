@@ -5,26 +5,29 @@
 
 #include <stdint.h>
 
-#define SYS_READ 0
-#define SYS_WRITE 1
-#define SYS_CLEAR 2
+#include "kernel/process.h"
+
+#define SYS_READ    0
+#define SYS_WRITE   1
+#define SYS_CLEAR   2
 #define SYS_MEMINFO 3
-
-#define SYS_BRK 12
-
-#define SYS_EXEC 59
-#define SYS_EXIT 60
+#define SYS_BRK     12
+#define SYS_GETPID  39
+#define SYS_SPAWN   57
+#define SYS_EXEC    59
+#define SYS_EXIT    60
+#define SYS_WAIT    61
 
 #define USER_LIMIT 0x00007FFFFFFFF000ULL
 #define EXT2_START_LBA 67584
 
-long sys_exec(const char *user_path);
+struct trapframe *sys_exec(struct trapframe *tf, const char *user_path);
 
 long syscall0(long n);
 long syscall1(long n, long a1);
 long syscall2(long n, long a1, long a2);
 long syscall3(long n, long a1, long a2, long a3);
 
-uint64_t syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5);
+struct trapframe *syscall_handler(struct trapframe *tf);
 
 #endif

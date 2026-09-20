@@ -67,6 +67,7 @@ compile cc src/kernel/main.c > build/object/main.o;
 compile cc src/kernel/renderer.c > build/object/renderer.o;
 compile cc src/kernel/driver/keyboard.c > build/object/driver/keyboard.o;
 compile cc src/kernel/gdt.c > build/object/gdt.o;
+compile cc src/kernel/process.c > build/object/process.o;
 compile cc src/kernel/idt.c > build/object/idt.o;
 compile cc src/kernel/syscall.c > build/object/syscall.o;
 compile cc src/kernel/paging.c > build/object/paging.o;
@@ -89,18 +90,22 @@ compile ucc src/libc/stdio.c > build/object/libc/stdio.o;
 
 # userland objects
 compile ucc src/userland/init.c > build/object/userland/init.o;
-compile ucc src/userland/hello.c > build/object/userland/hello.o;
-compile ucc src/userland/shell.c > build/object/userland/shell.o;
+
+compile ucc src/userland/shell/main.c > build/object/userland/shell/main.o;
+compile ucc src/userland/shell/yes.c > build/object/userland/shell/yes.o;
+compile ucc src/userland/shell/libctest.c > build/object/userland/shell/libctest.o;
 
 # userland ELFs
 compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/init.o > build/userland/init.elf;
-compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/shell.o > build/userland/shell.elf;
-compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/hello.o > build/userland/hello.elf;
+
+compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/shell/main.o > build/userland/shell/main.elf;
+compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/shell/yes.o > build/userland/shell/yes.elf;
+compile uld build/object/libc/crt0.o build/object/libc/syscall.o build/object/libc/errno.o build/object/libc/unistd.o build/object/libc/string.o build/object/libc/stdlib.o build/object/libc/stdio.o build/object/userland/shell/libctest.o > build/userland/shell/libctest.elf;
 
 # kernel init_elf.o with an ORDER-ONLY dependency on init.elf
 compile nasm src/kernel/init_elf.asm @ build/userland/init.elf > build/object/init/elf.o;
 
 # final kernel image
-compile ld build/object/entry.o build/object/isr.o build/object/user_entry.o build/object/main.o build/object/renderer.o build/object/driver/keyboard.o build/object/gdt.o build/object/idt.o build/object/syscall.o build/object/paging.o build/object/pmm.o build/object/heap.o build/object/elf.o build/object/ata.o build/object/fs/ext2.o build/object/init/elf.o build/object/user.o build/object/shell.o > build/uorix.elf;
+compile ld build/object/entry.o build/object/isr.o build/object/user_entry.o build/object/main.o build/object/renderer.o build/object/driver/keyboard.o build/object/gdt.o build/object/idt.o build/object/syscall.o build/object/paging.o build/object/pmm.o build/object/heap.o build/object/elf.o build/object/ata.o build/object/process.o build/object/fs/ext2.o build/object/init/elf.o build/object/user.o build/object/shell.o > build/uorix.elf;
 
-default build/uorix.elf build/userland/shell.elf build/userland/hello.elf;
+default build/uorix.elf build/userland/shell/main.elf build/userland/shell/yes.elf build/userland/shell/libctest.elf;

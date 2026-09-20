@@ -10,6 +10,7 @@ isr_null:
 
 global isr_syscall
 extern syscall_handler
+
 isr_syscall:
     push rax
     push rbx
@@ -27,21 +28,12 @@ isr_syscall:
     push r14
     push r15
 
-    mov rdi, [rsp+112]
-    mov rsi, [rsp+72]
-    mov rdx, [rsp+80]
-    mov rcx, [rsp+88]
-    mov r8,  [rsp+40]
-    mov r9,  [rsp+56]
-
-    mov rbp, rsp
+    mov rdi, rsp
     and rsp, -16
 
     call syscall_handler
 
-    mov [rbp+112], rax
-
-    mov rsp, rbp
+    mov rsp, rax
 
     pop r15
     pop r14

@@ -102,7 +102,7 @@ isatty(int fd)
 pid_t
 getpid(void)
 {
-    return 1;
+    return (pid_t)syscall0(SYS_GETPID);
 }
 
 unsigned int
@@ -110,4 +110,32 @@ sleep(unsigned int seconds)
 {
     (void)seconds;
     return 0;
+}
+
+pid_t
+spawn(const char *path)
+{
+    long ret = syscall1(SYS_SPAWN, (long)path);
+
+    if (ret < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return (pid_t)ret;
+}
+
+int
+wait(pid_t pid)
+{
+    long ret = syscall1(SYS_WAIT, (long)pid);
+
+    if (ret < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return (int)ret;
 }

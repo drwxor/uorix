@@ -24,12 +24,12 @@ The shell currently runs in the kernel.
 
 ## Building
 
-Uorix uses [mold](https://github.com/drwxor/mold).
+Uorix uses [kage](https://github.com/drwxor/kage).
 
 Build the kernel with:
 
 ```sh
-mold
+kage
 ```
 
 The resulting kernel is:

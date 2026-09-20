@@ -23,7 +23,8 @@ cmd_help(void)
     printf("\tclear    clear the screen\n");
     printf("\techo     print text\n");
     printf("\tprintf   print text without making new line\n");
-    printf("\texec     executes binary by absolute path\n");
+    printf("\trun      run binary by absolute path\n");
+    printf("\texec     replace shell with binary\n");
     printf("\tuname    show system name\n");
     printf("\tfetch    fetch current system status\n");
     printf("\tmem      show free physical pages\n");
@@ -131,8 +132,24 @@ main(void)
                 printf("%s\n", line + 5);
             else if (strncmp(line, "printf ", 5) == 0)
                 printf("%s", line + 7);
+            else if (strncmp(line, "run ", 4) == 0)
+            {
+                pid_t pid = spawn(line + 4);
+
+                if (pid < 0)
+                {
+                    printf("uorix: failed to spawn: %s\n",
+                           line + 4);
+                }
+                else
+                {
+                    wait(pid);
+                }
+            }
             else if (strncmp(line, "exec ", 5) == 0)
+            {
                 exec(line + 5);
+            }
             else
                 printf("uorix: command not found: %s\n", line);
 

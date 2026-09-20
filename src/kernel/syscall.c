@@ -8,11 +8,10 @@
 #include "kernel/fs/ext2.h"
 #include "kernel/paging.h"
 #include "kernel/heap.h"
+#include "kernel/process.h"
+#include "kernel/gdt.h"
 
 #include <stdint.h>
-
-extern void user_enter(uint64_t entry, uint64_t user_stack)
-    __attribute__((noreturn));
 
 static
 int
@@ -42,33 +41,198 @@ copy_user_string(char *dst, uint64_t cap, uint64_t src)
     return -1;
 }
 
-long
-sys_exec(const char *user_path)
+struct trapframe *
+sys_exec(struct trapframe *tf, const char *user_path)
 {
     char path[128];
 
-    if (copy_user_string(path, sizeof(path), (uint64_t)user_path) != 0)
-        return -1;
+    if (copy_user_string(path, sizeof(path),
+        (uint64_t)user_path) != 0)
+    {
+        tf->rax = (uint64_t)-1;
+        return tf;
+    }
 
     if (!rootfs)
     {
-        return -1;
+        tf->rax = (uint64_t)-1;
+        return tf;
     }
 
     void *file_buf = 0;
 
-    uint64_t file_size = ext2_read_file(rootfs, path, &file_buf);
+    uint64_t file_size =
+    ext2_read_file(rootfs, path, &file_buf);
 
     if (file_size == (uint64_t)-1 || file_buf == 0)
-        return -1;
+    {
+        tf->rax = (uint64_t)-1;
+        return tf;
+    }
 
     uint64_t user_stack_top = 0;
 
-    uint64_t user_pml4 = paging_create_user_as(&user_stack_top);
+    uint64_t user_pml4 =
+    paging_create_user_as(&user_stack_top);
 
     if (user_pml4 == 0)
     {
         kfree(file_buf);
+        tf->rax = (uint64_t)-1;
+        return tf;
+    }
+
+    uint64_t entry = 0;
+    uint64_t brk = 0;
+
+    int rc = elf_load(
+        file_buf,
+        file_size,
+        user_pml4,
+        &entry,
+        &brk
+    );
+
+    kfree(file_buf);
+
+    if (rc != 0)
+    {
+        tf->rax = (uint64_t)-1;
+        return tf;
+    }
+
+    struct process *current = process_current();
+
+    current->pml4 = user_pml4;
+    current->brk = brk;
+    current->brk_start = brk;
+    current->tf = tf;
+
+    tf->rip = entry;
+    tf->rsp = user_stack_top;
+    tf->rax = 0;
+
+    paging_load_cr3(user_pml4);
+    tss_set_rsp0(current->kstack_top);
+
+    return tf;
+}
+
+static
+struct trapframe *
+sys_wait(struct trapframe *tf, int pid)
+{
+    struct process *parent = process_current();
+    struct process *child = process_find(pid);
+
+    if (!child || child->ppid != parent->pid)
+    {
+        tf->rax = (uint64_t)-1;
+        return tf;
+    }
+
+    if (child->state == PROC_ZOMBIE)
+    {
+        int status = child->exit_status;
+
+        process_discard(child);
+
+        tf->rax = (uint64_t)status;
+        return tf;
+    }
+
+    parent->state = PROC_BLOCKED;
+    child->state = PROC_RUNNING;
+
+    return process_switch(child);
+}
+
+static
+struct trapframe *
+sys_exit(struct trapframe *tf, int status)
+{
+    struct process *child = process_current();
+    struct process *parent = process_find(child->ppid);
+
+    child->exit_status = status;
+    child->state = PROC_ZOMBIE;
+
+    if (!parent)
+    {
+        render_printf(
+            "\nprocess %d: exited\n",
+            child->pid
+        );
+
+        for (;;)
+            __asm__ volatile ("hlt");
+    }
+
+    parent->state = PROC_RUNNING;
+
+    if (!parent->tf)
+    {
+        render_printf(
+            "\nprocess %d: parent has no trapframe\n",
+            child->pid
+        );
+
+        for (;;)
+            __asm__ volatile ("hlt");
+    }
+
+    parent->tf->rax = (uint64_t)status;
+
+    return process_switch(parent);
+}
+
+static
+long
+sys_spawn(const char *user_path)
+{
+    char path[128];
+
+    if (copy_user_string(
+        path,
+        sizeof(path),
+                         (uint64_t)user_path) != 0)
+    {
+        return -1;
+    }
+
+    if (!rootfs)
+        return -1;
+
+    void *file_buf = 0;
+
+    uint64_t file_size =
+    ext2_read_file(rootfs, path, &file_buf);
+
+    if (file_size == (uint64_t)-1 ||
+        file_buf == 0)
+    {
+        return -1;
+    }
+
+    struct process *parent = process_current();
+
+    struct process *child = process_create();
+
+    if (!child)
+    {
+        kfree(file_buf);
+        return -1;
+    }
+
+    uint64_t user_stack_top = 0;
+
+    uint64_t user_pml4 =
+    paging_create_user_as(&user_stack_top);
+
+    if (!user_pml4)
+    {
+        kfree(file_buf);
+        process_discard(child);
         return -1;
     }
 
@@ -86,65 +250,108 @@ sys_exec(const char *user_path)
     kfree(file_buf);
 
     if (rc != 0)
+    {
+        process_discard(child);
         return -1;
+    }
 
-    elf_brk_init(brk, user_pml4);
+    child->ppid = parent->pid;
+    child->pml4 = user_pml4;
+    child->brk = brk;
+    child->brk_start = brk;
 
-    paging_load_cr3(user_pml4);
+    process_make_user(
+        child,
+        entry,
+        user_stack_top
+    );
 
-    user_enter(entry, user_stack_top);
+    child->state = PROC_RUNNABLE;
 
-    __builtin_unreachable();
+    return child->pid;
 }
 
-uint64_t
-syscall_handler(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5)
+struct trapframe *
+syscall_handler(struct trapframe *tf)
 {
-    (void)a3;
-    (void)a4;
-    (void)a5;
+    struct process *current = process_current();
 
-    switch (nr)
+    current->tf = tf;
+
+    switch (tf->rax)
     {
         case SYS_READ:
         {
-            char *buf = (char *)a1;
-            if (a2 < 1)
-                return 0;
+            char *buf = (char *)tf->rdi;
+
+            if (tf->rsi < 1)
+            {
+                tf->rax = 0;
+                return tf;
+            }
+
             buf[0] = keyboard_getc();
-            return 1;
+
+            tf->rax = 1;
+            return tf;
         }
 
         case SYS_WRITE:
         {
-            const char *buf = (const char *)a1;
-            uint64_t count = a2;
+            const char *buf = (const char *)tf->rdi;
+            uint64_t count = tf->rsi;
+
             for (uint64_t i = 0; i < count; i++)
-                render_putc(buf[i], a3);
-            return count;
+                render_putc(buf[i], tf->rdx);
+
+            tf->rax = count;
+            return tf;
         }
 
         case SYS_CLEAR:
             render_clear(0x00000000);
-            return 0;
+            tf->rax = 0;
+            return tf;
 
         case SYS_MEMINFO:
-            return pmm_free_pages();
+            tf->rax = pmm_free_pages();
+            return tf;
+
+        case SYS_GETPID:
+            tf->rax = current->pid;
+            return tf;
 
         case SYS_BRK:
-            return elf_brk(a1);
+            tf->rax = elf_brk(tf->rdi);
+            return tf;
 
-        case SYS_EXEC:
-            return sys_exec((const char *)a1);
+        case SYS_SPAWN:
+            tf->rax = sys_spawn(
+                (const char *)tf->rdi
+            );
+            return tf;
+
+        case SYS_WAIT:
+            return sys_wait(
+                tf,
+                (int)tf->rdi
+            );
 
         case SYS_EXIT:
-            render_printf("\n[pid 1] exit %u\n", a1);
-            for (;;)
-                __asm__ volatile ("hlt");
-            return 0;
+            return sys_exit(
+                tf,
+                (int)tf->rdi
+            );
+
+        case SYS_EXEC:
+            return sys_exec(
+                tf,
+                (const char *)tf->rdi
+            );
 
         default:
-            return (uint64_t)-1;
+            tf->rax = (uint64_t)-1;
+            return tf;
     }
 }
 

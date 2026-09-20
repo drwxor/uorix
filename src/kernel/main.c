@@ -14,6 +14,7 @@
 #include "kernel/ata.h"
 #include "kernel/fs/ext2.h"
 #include "kernel/shell/shell.h"
+#include "kernel/process.h"
 
 __attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
@@ -116,6 +117,7 @@ kmain(void)
 
     heap_init();
     paging_allow_user_access();
+    process_init();
 
     uint64_t user_stack_top = 0;
     uint64_t user_pml4 = paging_create_user_as(&user_stack_top);
@@ -156,8 +158,6 @@ kmain(void)
             {
                 render_printf("ext2: /bin/init not found or unreadable!\n");
             }
-
-            ext2_unmount(fs);
         }
         else
         {
@@ -188,8 +188,20 @@ kmain(void)
             __asm__ volatile ("hlt");
     }
 
-    elf_brk_init(brk, user_pml4);
+    if (process_bootstrap(user_pml4, brk) != 0)
+    {
+        render_printf("process: unable to create init\n");
+
+        for (;;)
+            __asm__ volatile ("hlt");
+    }
+
+    elf_brk_init(brk);
+
+    render_printf("process: init pid=%d\n", process_current()->pid);
+
     render_printf("elf: entering userspace\n");
+
     user_enter(entry, user_stack_top);
 
     for (;;)

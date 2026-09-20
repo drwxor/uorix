@@ -3,7 +3,7 @@ import sys
 
 def build():
     print("==> Building...")
-    result = subprocess.run(["mold"])
+    result = subprocess.run(["kage"])
 
     return result.returncode;
 

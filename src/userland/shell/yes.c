@@ -7,13 +7,6 @@ main(void)
 {
   while (1) 
   {
-    if (argc > 1) 
-    {
-      printf("%s\n", argv[1]);
-    } 
-    else 
-    {
-      printf("y\n");
-    }
+    printf("y\n");
   }
 }
